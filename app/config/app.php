@@ -9,14 +9,11 @@ return [
     ],
     
     'database' => [
-        'driver' => 'mysql', // mysql veya sqlite
+        'driver' => 'mysql', // mysql
         'host' => 'localhost',
         'database' => 'simple_framework',
         'username' => 'root',
         'password' => '',
         'charset' => 'utf8mb4',
-        
-        // SQLite ayarları (fallback)
-        'sqlite_path' => ROOT_PATH . '/database.sqlite'
     ]
 ];

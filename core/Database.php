@@ -38,24 +38,8 @@ class Database
             }
             
         } catch (PDOException $e) {
-            // MySQL bağlantısı başarısız olursa SQLite'a geç
-            if (extension_loaded('pdo_sqlite')) {
-                try {
-                    $dbPath = ROOT_PATH . '/database.sqlite';
-                    $dsn = "sqlite:" . $dbPath;
-                    
-                    $this->pdo = new PDO($dsn, null, null, [
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-                    ]);
-                    
 
-                } catch (PDOException $sqliteError) {
-                    throw new Exception("Veritabanı bağlantısı başarısız. MySQL hatası: " . $e->getMessage() . " SQLite hatası: " . $sqliteError->getMessage());
-                }
-            } else {
-                throw new Exception("Veritabanı bağlantısı başarısız: " . $e->getMessage() . ". PDO driver kontrolü yapın.");
-            }
+            throw new Exception("Veritabanı bağlantısı başarısız: " . $e->getMessage() . ". PDO driver kontrolü yapın.");
         }
     }
 

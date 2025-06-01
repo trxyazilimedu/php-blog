@@ -4,12 +4,17 @@ class App
 {
     public function __construct()
     {
+        // Session'ı başlat
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         // Output buffering başlat (header sorunlarını önlemek için)
         if (!ob_get_level()) {
             ob_start();
         }
         
-        // Helper fonksiyonları yükle
+        // Helper fonksiyonlarını yükle
         require_once APP_PATH . '/config/functions.php';
         
         // Authorization sınıfını yükle
@@ -39,6 +44,11 @@ class App
         // Router ile işle
         $handled = Router::dispatch($requestUri, $requestMethod);
         
+        // Debug için log ekle
+        if (isset($_GET['debug'])) {
+            echo "<p style='background: yellow; padding: 10px;'>Router handled: " . ($handled ? 'true' : 'false') . "</p>";
+        }
+        
         // Eğer route bulunamazsa fallback controller sistemi
         if (!$handled) {
             $this->fallbackRouting($requestUri);
@@ -57,6 +67,18 @@ class App
         } elseif (isset($_SERVER['REQUEST_URI'])) {
             $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $uri = trim($requestUri, '/');
+        }
+        
+        // Debug bilgisi
+        if (isset($_GET['debug'])) {
+            echo "<div style='background: #ffc107; padding: 10px; margin: 5px;'>";
+            echo "<strong>URI Debug:</strong><br>";
+            echo "GET[url]: " . ($_GET['url'] ?? 'N/A') . "<br>";
+            echo "PATH_INFO: " . ($_SERVER['PATH_INFO'] ?? 'N/A') . "<br>";
+            echo "REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'N/A') . "<br>";
+            echo "Parsed URI: '{$uri}'<br>";
+            echo "Final URI: '" . ('/' . trim($uri, '/')) . "'";
+            echo "</div>";
         }
         
         return '/' . trim($uri, '/');
@@ -148,7 +170,7 @@ class App
 
     private function error404($message = "Sayfa bulunamadı")
     {
-
+        http_response_code(404);
         
         // Custom 404 sayfası varsa kullan
         if (file_exists(APP_PATH . '/views/errors/404.php')) {

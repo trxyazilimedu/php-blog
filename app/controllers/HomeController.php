@@ -28,19 +28,18 @@ class HomeController extends BaseController
 
     public function about()
     {
-        echo 'test';
-//        $data = [
-//            'page_title' => 'Hakkında',
-//            'content' => 'Bu basit bir PHP framework örneğidir.',
-//            'framework_info' => [
-//                'version' => $this->getGlobalData('app_version'),
-//                'author' => 'Simple Framework Team',
-//                'license' => 'MIT License',
-//                'github' => 'https://github.com/simple-framework'
-//            ]
-//        ];
-//
-//        $this->view('home/about', $data);
+        $data = [
+            'page_title' => 'Hakkında',
+            'content' => 'Bu basit bir PHP framework örneğidir.',
+            'framework_info' => [
+                'version' => $this->getGlobalData('app_version'),
+                'author' => 'Simple Framework Team',
+                'license' => 'MIT License',
+                'github' => 'https://github.com/simple-framework'
+            ]
+        ];
+
+        $this->view('home/about', $data);
     }
 
     public function contact()
