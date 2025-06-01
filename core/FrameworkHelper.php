@@ -218,7 +218,6 @@ class FrameworkHelper
             'current_url' => $_SERVER['REQUEST_URI'] ?? '/',
             'is_logged_in' => self::isUserLoggedIn(),
             'user' => self::getLoggedInUser(),
-            'navigation' => self::getNavigationItems(),
             'csrf_token' => self::generateCSRFToken()
         ];
     }
