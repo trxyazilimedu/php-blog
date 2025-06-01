@@ -204,21 +204,7 @@ class FrameworkHelper
         return $user;
     }
 
-    /**
-     * Navigasyon menüsü
-     */
-    public static function getNavigationItems($currentUrl = null)
-    {
-        $currentUrl = $currentUrl ?: ($_SERVER['REQUEST_URI'] ?? '/');
-        $currentPath = parse_url($currentUrl, PHP_URL_PATH);
-        
-        return [
-            ['url' => '/', 'title' => 'Ana Sayfa', 'active' => $currentPath === '/'],
-            ['url' => '/about', 'title' => 'Hakkında', 'active' => $currentPath === '/about'],
-            ['url' => '/contact', 'title' => 'İletişim', 'active' => $currentPath === '/contact'],
-            ['url' => '/users', 'title' => 'Kullanıcılar', 'active' => str_starts_with($currentPath, '/users')]
-        ];
-    }
+
 
     /**
      * Global data oluşturma

@@ -51,40 +51,26 @@ class HomeController extends BaseController
                 'message' => $this->input('message', '')
             ];
             
-            // Validation service kullanımı
-            $errors = $this->validate($contactData, [
+            // Validation kuralları
+            $rules = [
                 'name' => 'required|min:2|max:100',
                 'email' => 'required|email|max:255',
                 'message' => 'required|min:10|max:1000'
-            ]);
+            ];
             
-            if (empty($errors)) {
-                // Veritabanına kaydet
-                $contactModel = $this->model('Contact');
-                if ($contactModel->createMessage($contactData)) {
-                    $this->flash('success', 'Mesajınız başarıyla gönderildi!');
-                } else {
-                    $this->flash('error', 'Mesaj gönderilirken bir hata oluştu.');
-                }
-                
-                // POST-Redirect-GET pattern
-                $this->redirect('/contact');
-                return;
-            } else {
-                // Hataları flash'e kaydet
-                foreach ($errors as $field => $fieldErrors) {
-                    foreach ($fieldErrors as $error) {
-                        $this->flash('error', $error);
-                    }
-                }
-                
-                // Eski input'ları sakla
-                $_SESSION['old_input'] = $contactData;
-                
-                // Redirect ile hata sayfasına dön
-                $this->redirect('/contact');
+            // Validation yap ve hata varsa redirect et
+            if (!$this->validateOrRedirect($contactData, $rules, '/contact')) {
                 return;
             }
+            
+            // Veritabanına kaydet
+            $contactModel = $this->model('Contact');
+            if ($contactModel->createMessage($contactData)) {
+                $this->redirectWithSuccess('/contact', 'Mesajınız başarıyla gönderildi!');
+            } else {
+                $this->redirectWithError('/contact', 'Mesaj gönderilirken bir hata oluştu.');
+            }
+            return;
         }
         
         // GET request - normal sayfa gösterimi

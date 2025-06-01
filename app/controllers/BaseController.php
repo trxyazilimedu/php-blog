@@ -1,260 +1,188 @@
 <?php
 
-abstract class BaseController
+/**
+ * BaseController - Uygulama Seviyesi Controller
+ * 
+ * Bu sınıf, Core\Controller'dan extend eder.
+ * Tüm temel işlevler artık Core\Controller'da bulunuyor.
+ * 
+ * Bu sınıf sadece uygulamaya özel özelleştirmeler için kullanılır.
+ * Tüm uygulama controller'ları bu sınıftan extend edilmelidir.
+ */
+abstract class BaseController extends Controller
 {
-    protected $db;
-    protected $globalData = [];
-    protected $services = [];
-
+    /**
+     * Constructor - Uygulama seviyesi başlatma işlemleri
+     */
     public function __construct()
     {
-        // Session başlat
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        // Core Controller'ı başlat (tüm temel işlevler orada)
+        parent::__construct();
+        
+        // Uygulama seviyesi özelleştirmeler
+        $this->initializeCustomServices();
+        $this->setApplicationSpecificGlobals();
+    }
+
+    // ===========================================
+    // Application-Specific Initialization
+    // ===========================================
+
+    /**
+     * Özel uygulama servislerini başlatma
+     * Burada sadece bu uygulamaya özel servisler tanımlanır
+     */
+    private function initializeCustomServices()
+    {
+        // Örnek: Özel servisler
+        // $this->emailService = new EmailService();
+        // $this->paymentService = new PaymentService();
+        
+        // Lazy loading için services array'ine eklenebilir
+        // $this->services['email'] = null; // Lazy load edilecek
+    }
+
+    /**
+     * Uygulama seviyesi global veriler
+     * Framework global verileri Core\Controller'da ayarlanıyor
+     */
+    private function setApplicationSpecificGlobals()
+    {
+        // Sadece bu uygulamaya özel global veriler
+        $this->addGlobalData('app_theme', 'default');
+        $this->addGlobalData('app_locale', 'tr_TR');
+        
+        // Örnek: Kullanıcı tercihlerine göre tema
+        $user = $this->getLoggedInUser();
+        if ($user && isset($user['theme_preference'])) {
+            $this->addGlobalData('app_theme', $user['theme_preference']);
         }
         
-        // FrameworkHelper'i yükle
-        require_once CORE_PATH . '/FrameworkHelper.php';
+        // Örnek: Özel navigasyon menüsü
+        $this->addGlobalData('custom_menu_items', $this->getCustomMenuItems());
+    }
+
+    // ===========================================
+    // Application-Specific Helper Methods
+    // ===========================================
+
+    /**
+     * Özel menü öğelerini al
+     * Bu uygulamaya özel navigasyon öğeleri
+     */
+    private function getCustomMenuItems()
+    {
+        $menuItems = [];
         
-        // Helper işlemlerini başlat
-        FrameworkHelper::startSession();
-        $this->db = Database::getInstance();
-        $this->globalData = FrameworkHelper::buildGlobalData();
-    }
-
-    /**
-     * View render etme
-     */
-    protected function view($view, $data = [])
-    {
-        FrameworkHelper::renderView($view, $data, $this->globalData);
-    }
-
-    /**
-     * Model yükleme
-     */
-    protected function model($model)
-    {
-        return FrameworkHelper::loadModel($model);
-    }
-
-    /**
-     * Service'e erişim
-     */
-    protected function service($serviceName)
-    {
-        return FrameworkHelper::loadService($serviceName, $this->services);
-    }
-
-    /**
-     * Yönlendirme
-     */
-    protected function redirect($url, $statusCode = 302)
-    {
-        FrameworkHelper::redirect($url, $statusCode);
-    }
-
-    /**
-     * JSON response
-     */
-    protected function json($data, $statusCode = 200)
-    {
-        FrameworkHelper::jsonResponse($data, $statusCode);
-    }
-
-    /**
-     * Global veri ekleme
-     */
-    protected function addGlobalData($key, $value)
-    {
-        $this->globalData[$key] = $value;
-    }
-
-    /**
-     * Global veri alma
-     */
-    protected function getGlobalData($key = null)
-    {
-        if ($key === null) {
-            return $this->globalData;
+        // Admin kullanıcıları için özel menü
+        if ($this->isUserLoggedIn() && $this->isAdmin()) {
+            $menuItems[] = [
+                'title' => 'Admin Panel',
+                'url' => '/admin',
+                'icon' => '⚙️'
+            ];
         }
         
-        return $this->globalData[$key] ?? null;
-    }
-
-    /**
-     * Flash mesaj ekleme
-     */
-    protected function flash($type, $message)
-    {
-        FrameworkHelper::addFlashMessage($type, $message);
-    }
-
-    /**
-     * CSRF token doğrulama
-     */
-    protected function validateCSRFToken($token)
-    {
-        return FrameworkHelper::validateCSRFToken($token);
-    }
-
-    /**
-     * Input validation
-     */
-    protected function validate($data, $rules)
-    {
-        return FrameworkHelper::validateInput($data, $rules);
-    }
-
-    /**
-     * Dosya upload
-     */
-    protected function uploadFile($fileInput, $uploadPath = 'uploads/')
-    {
-        return FrameworkHelper::handleFileUpload($fileInput, $uploadPath);
-    }
-
-    /**
-     * Cache
-     */
-    protected function cache($key, $data = null, $ttl = 3600)
-    {
-        return FrameworkHelper::cache($key, $data, $ttl);
-    }
-
-    /**
-     * Log
-     */
-    protected function log($message, $level = 'info', $context = [])
-    {
-        FrameworkHelper::log($message, $level, $context);
-    }
-
-    // ===========================================
-    // Yetkilendirme Helper Methods
-    // ===========================================
-
-    /**
-     * Kullanıcı giriş kontrolü
-     */
-    protected function isUserLoggedIn()
-    {
-        return FrameworkHelper::isUserLoggedIn();
-    }
-
-    /**
-     * Giriş yapan kullanıcı bilgisi
-     */
-    protected function getLoggedInUser()
-    {
-        return FrameworkHelper::getLoggedInUser();
-    }
-
-    /**
-     * Giriş yapmış kullanıcı gerekli
-     */
-    protected function requireAuth()
-    {
-        return Authorization::requireAuth();
-    }
-
-    /**
-     * Admin yetkisi gerekli
-     */
-    protected function requireAdmin()
-    {
-        return Authorization::requireAdmin();
-    }
-
-    /**
-     * Belirli rol gerekli
-     */
-    protected function requireRole($role)
-    {
-        return Authorization::requireRole($role);
-    }
-
-    /**
-     * Kaynak sahibi veya admin gerekli
-     */
-    protected function requireOwnerOrAdmin($resourceUserId)
-    {
-        return Authorization::requireOwnerOrAdmin($resourceUserId);
-    }
-
-    // ===========================================
-    // Request Helper Methods
-    // ===========================================
-
-    /**
-     * Request method kontrolü
-     */
-    protected function isPost()
-    {
-        return $_SERVER['REQUEST_METHOD'] === 'POST';
-    }
-
-    /**
-     * Request method kontrolü
-     */
-    protected function isGet()
-    {
-        return $_SERVER['REQUEST_METHOD'] === 'GET';
-    }
-
-    /**
-     * AJAX request kontrolü
-     */
-    protected function isAjax()
-    {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-               strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
-    }
-
-    /**
-     * Input değeri alma
-     */
-    protected function input($key, $default = null)
-    {
-        return $_POST[$key] ?? $_GET[$key] ?? $default;
-    }
-
-    /**
-     * Tüm input'ları alma
-     */
-    protected function all()
-    {
-        return array_merge($_GET, $_POST);
-    }
-
-    /**
-     * Sadece belirtilen key'leri alma
-     */
-    protected function only(...$keys)
-    {
-        $all = $this->all();
-        $result = [];
+        // Kullanıcı girişi yapmışsa özel menü
+        if ($this->isUserLoggedIn()) {
+            $menuItems[] = [
+                'title' => 'Profilim',
+                'url' => '/users/profile',
+                'icon' => '👤'
+            ];
+        }
         
-        foreach ($keys as $key) {
-            if (isset($all[$key])) {
-                $result[$key] = $all[$key];
+        return $menuItems;
+    }
+
+
+
+
+    // ===========================================
+    // Business Logic Helpers (Uygulama Özel)
+    // ===========================================
+
+    /**
+     * Kullanıcı aktivitesi kaydet
+     * Bu uygulamaya özel business logic
+     */
+    protected function logUserActivity($action, $details = [])
+    {
+        if (!$this->isUserLoggedIn()) {
+            return false;
+        }
+        
+        $user = $this->getLoggedInUser();
+        
+        $activityData = [
+            'user_id' => $user['id'],
+            'action' => $action,
+            'details' => json_encode($details),
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Activity log tablosuna kaydet (varsa)
+        try {
+            // $activityModel = $this->model('UserActivity');
+            // $activityModel->create($activityData);
+            
+            // Şimdilik log'a yaz
+            $this->log('User Activity', 'info', $activityData);
+            
+        } catch (Exception $e) {
+            $this->log('Failed to log user activity: ' . $e->getMessage(), 'error');
+        }
+        
+        return true;
+    }
+
+    /**
+     * Sistem bakım modu kontrolü
+     */
+    protected function checkMaintenanceMode()
+    {
+        $maintenanceFile = storage_path('maintenance.flag');
+        
+        if (file_exists($maintenanceFile)) {
+            // Admin'ler bakım modunda da erişebilir
+            if ($this->isUserLoggedIn() && $this->isAdmin()) {
+                $this->flash('warning', 'Site bakım modunda - sadece admin erişimi aktif');
+                return true;
             }
+            
+            // Normal kullanıcılar için bakım sayfası
+            $this->setStatusCode(503);
+            $this->view('errors/maintenance', [
+                'title' => 'Site Bakımda',
+                'message' => 'Sitemiz şu anda bakım çalışması nedeniyle kapalıdır. Lütfen daha sonra tekrar deneyin.'
+            ]);
+            exit;
         }
         
-        return $result;
+        return true;
+    }
+
+    // ===========================================
+    // Deprecated Methods (Geriye Uyumluluk)
+    // ===========================================
+
+    /**
+     * @deprecated Core\Controller'da tanımlı
+     * Geriye uyumluluk için korundu
+     */
+    protected function isLoggedIn()
+    {
+        return $this->isUserLoggedIn();
     }
 
     /**
-     * Belirtilen key'ler hariç tümünü alma
+     * @deprecated Core\Controller'da tanımlı  
+     * Geriye uyumluluk için korundu
      */
-    protected function except(...$keys)
+    protected function getCurrentUser()
     {
-        $all = $this->all();
-        
-        foreach ($keys as $key) {
-            unset($all[$key]);
-        }
-        
-        return $all;
+        return $this->getLoggedInUser();
     }
 }

@@ -252,6 +252,7 @@ class Router
             }
             
             if (file_exists($controllerFile)) {
+                require_once CORE_PATH . '/Controller.php';
                 require_once APP_PATH . '/controllers/BaseController.php';
                 require_once $controllerFile;
                 

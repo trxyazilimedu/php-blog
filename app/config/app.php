@@ -11,8 +11,8 @@ return [
     'database' => [
         'driver' => 'mysql', // mysql
         'host' => 'localhost',
-        'database' => 'simple_framework',
-        'username' => 'root',
+        'database' => 'trxyazilimapixyz_blog',
+        'username' => 'trxyazilimapixyz_blog',
         'password' => '',
         'charset' => 'utf8mb4',
     ]

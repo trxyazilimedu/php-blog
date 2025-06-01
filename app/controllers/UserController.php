@@ -36,16 +36,11 @@ class UserController extends BaseController
 
     public function create()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $userData = [
-                'name' => $_POST['name'] ?? '',
-                'email' => $_POST['email'] ?? '',
-                'password' => $_POST['password'] ?? '',
-                'role' => $_POST['role'] ?? 'user'
-            ];
+        if ($this->isPost()) {
+            $userData = $this->only('name', 'email', 'password', 'role');
+            $userData['role'] = $userData['role'] ?? 'user';
             
-            // Validation service kullanımı
-            $validator = $this->service('validation');
+            // Validation kuralları
             $rules = [
                 'name' => 'required|min:2|max:100',
                 'email' => 'required|email|max:255|unique:users,email',
@@ -53,25 +48,21 @@ class UserController extends BaseController
                 'role' => 'required|in:user,admin'
             ];
             
-            if ($validator->validate($userData, $rules)) {
-                $authService = $this->service('auth');
-                $result = $authService->register($userData);
-                
-                if ($result['success']) {
-                    $this->flash('success', $result['message']);
-                    $this->redirect('/users');
-                } else {
-                    $this->flash('error', $result['message']);
-                }
-            } else {
-                $data = [
-                    'page_title' => 'Yeni Kullanıcı',
-                    'errors' => $validator->getErrors(),
-                    'old_data' => $userData
-                ];
-                $this->view('users/create', $data);
+            // Validation yap ve hata varsa redirect et
+            if (!$this->validateOrRedirect($userData, $rules, '/users/create')) {
                 return;
             }
+            
+            // Kullanıcı oluştur
+            $authService = $this->service('auth');
+            $result = $authService->register($userData);
+            
+            if ($result['success']) {
+                $this->redirectWithSuccess('/users', $result['message']);
+            } else {
+                $this->redirectWithError('/users/create', $result['message']);
+            }
+            return;
         }
         
         $data = [
@@ -151,29 +142,22 @@ class UserController extends BaseController
     public function delete($id)
     {
         // CSRF token kontrolü
-        if (!$this->validateCSRFToken($_POST['csrf_token'] ?? '')) {
-            $this->flash('error', 'Geçersiz CSRF token!');
-            $this->redirect('/users');
-            return;
-        }
+        $this->verifyCsrfOrFail();
         
         $userModel = $this->model('User');
         
         // Kendi hesabını silmeye çalışıyorsa engelle
         $currentUser = $this->getLoggedInUser();
         if ($currentUser && $currentUser['id'] == $id) {
-            $this->flash('error', 'Kendi hesabınızı silemezsiniz!');
-            $this->redirect('/users');
+            $this->redirectWithError('/users', 'Kendi hesabınızı silemezsiniz!');
             return;
         }
         
         if ($userModel->delete($id)) {
-            $this->flash('success', 'Kullanıcı başarıyla silindi!');
+            $this->redirectWithSuccess('/users', 'Kullanıcı başarıyla silindi!');
         } else {
-            $this->flash('error', 'Kullanıcı silinirken bir hata oluştu!');
+            $this->redirectWithError('/users', 'Kullanıcı silinirken bir hata oluştu!');
         }
-        
-        $this->redirect('/users');
     }
 
     // API endpoint örneği
@@ -182,12 +166,7 @@ class UserController extends BaseController
         $userModel = $this->model('User');
         $users = $userModel->getActiveUsers();
         
-        $this->json([
-            'success' => true,
-            'data' => $users,
-            'count' => count($users),
-            'timestamp' => date('c')
-        ]);
+        $this->apiSuccess($users, 'Kullanıcılar başarıyla getirildi');
     }
     
     public function profile()

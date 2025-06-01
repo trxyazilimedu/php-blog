@@ -120,7 +120,9 @@ class App
         $controllerFile = APP_PATH . '/controllers/' . $controller . '.php';
         
         if (file_exists($controllerFile)) {
-            // BaseController'ı önce yükle
+            // Core Controller'ı önce yükle
+            require_once CORE_PATH . '/Controller.php';
+            // BaseController'ı yükle
             require_once APP_PATH . '/controllers/BaseController.php';
             require_once $controllerFile;
             

@@ -29,3 +29,15 @@ Router::get('/users/edit/{id}', 'User@edit');
 Router::post('/users/edit/{id}', 'User@edit');
 Router::post('/users/delete/{id}', 'User@delete');
 
+// ===========================================
+// Test Routes (Core Controller Test)
+// ===========================================
+
+Router::get('/test', 'Test@index');
+Router::get('/test/api-test', 'Test@apiTest');
+Router::get('/test/rate-limit-test', 'Test@rateLimitTest');
+Router::get('/test/cache-test', 'Test@cacheTest');
+Router::get('/test/export-csv', 'Test@exportCsv');
+Router::get('/test/export-xml', 'Test@exportXml');
+Router::get('/test/debug-info', 'Test@debugInfo');
+
