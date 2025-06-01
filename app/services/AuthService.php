@@ -3,12 +3,14 @@
 class AuthService
 {
     private $db;
-    private $sessionService;
 
     public function __construct()
     {
         $this->db = Database::getInstance();
-        $this->sessionService = new SessionService();
+        // Session zaten başlatılmış
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 
     /**
@@ -21,10 +23,10 @@ class AuthService
 
         if ($user && password_verify($password, $user['password'])) {
             // Session'a kullanıcı bilgilerini kaydet
-            $this->sessionService->set('user_id', $user['id']);
-            $this->sessionService->set('user_email', $user['email']);
-            $this->sessionService->set('user_name', $user['name']);
-            $this->sessionService->set('user_role', $user['role'] ?? 'user');
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_role'] = $user['role'] ?? 'user';
 
             // Son giriş tarihini güncelle
             $userModel->update($user['id'], ['last_login' => date('Y-m-d H:i:s')]);
@@ -47,7 +49,8 @@ class AuthService
      */
     public function logout()
     {
-        $this->sessionService->destroy();
+        session_unset();
+        session_destroy();
         
         return [
             'success' => true,
@@ -130,7 +133,7 @@ class AuthService
      */
     public function getUser()
     {
-        $userId = $this->sessionService->get('user_id');
+        $userId = $_SESSION['user_id'] ?? null;
         
         if (!$userId) {
             return null;
@@ -145,7 +148,7 @@ class AuthService
      */
     public function isLoggedIn()
     {
-        return $this->sessionService->has('user_id');
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
     }
 
     /**
@@ -153,7 +156,7 @@ class AuthService
      */
     public function isAdmin()
     {
-        $role = $this->sessionService->get('user_role');
+        $role = $_SESSION['user_role'] ?? 'user';
         return $role === 'admin';
     }
 
@@ -162,7 +165,7 @@ class AuthService
      */
     public function hasRole($role)
     {
-        $userRole = $this->sessionService->get('user_role');
+        $userRole = $_SESSION['user_role'] ?? 'user';
         return $userRole === $role;
     }
 }

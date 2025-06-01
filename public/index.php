@@ -14,13 +14,15 @@ spl_autoload_register(function ($class) {
     $paths = [
         CORE_PATH . '/' . $class . '.php',
         APP_PATH . '/controllers/' . $class . '.php',
-        APP_PATH . '/models/' . $class . '.php'
+        APP_PATH . '/models/' . $class . '.php',
+        APP_PATH . '/services/' . $class . '.php',
+        APP_PATH . '/config/' . $class . '.php'
     ];
     
     foreach ($paths as $path) {
         if (file_exists($path)) {
             require_once $path;
-            break;
+            return;
         }
     }
 });

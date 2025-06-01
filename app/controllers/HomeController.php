@@ -28,60 +28,74 @@ class HomeController extends BaseController
 
     public function about()
     {
-        $data = [
-            'page_title' => 'Hakkında',
-            'content' => 'Bu basit bir PHP framework örneğidir.',
-            'framework_info' => [
-                'version' => $this->getGlobalData('app_version'),
-                'author' => 'Simple Framework Team',
-                'license' => 'MIT License',
-                'github' => 'https://github.com/simple-framework'
-            ]
-        ];
-        
-        $this->view('home/about', $data);
+        echo 'test';
+//        $data = [
+//            'page_title' => 'Hakkında',
+//            'content' => 'Bu basit bir PHP framework örneğidir.',
+//            'framework_info' => [
+//                'version' => $this->getGlobalData('app_version'),
+//                'author' => 'Simple Framework Team',
+//                'license' => 'MIT License',
+//                'github' => 'https://github.com/simple-framework'
+//            ]
+//        ];
+//
+//        $this->view('home/about', $data);
     }
 
     public function contact()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($this->isPost()) {
             $contactData = [
-                'name' => $_POST['name'] ?? '',
-                'email' => $_POST['email'] ?? '',
-                'message' => $_POST['message'] ?? ''
+                'name' => $this->input('name', ''),
+                'email' => $this->input('email', ''),
+                'message' => $this->input('message', '')
             ];
             
             // Validation service kullanımı
-            $validator = $this->service('validation');
-            $rules = [
+            $errors = $this->validate($contactData, [
                 'name' => 'required|min:2|max:100',
                 'email' => 'required|email|max:255',
                 'message' => 'required|min:10|max:1000'
-            ];
+            ]);
             
-            if ($validator->validate($contactData, $rules)) {
+            if (empty($errors)) {
                 // Veritabanına kaydet
                 $contactModel = $this->model('Contact');
                 if ($contactModel->createMessage($contactData)) {
                     $this->flash('success', 'Mesajınız başarıyla gönderildi!');
-                    $this->redirect('/contact');
                 } else {
                     $this->flash('error', 'Mesaj gönderilirken bir hata oluştu.');
                 }
+                
+                // POST-Redirect-GET pattern
+                $this->redirect('/contact');
+                return;
             } else {
-                $data = [
-                    'page_title' => 'İletişim',
-                    'errors' => $validator->getErrors(),
-                    'old_data' => $contactData
-                ];
-                $this->view('home/contact', $data);
+                // Hataları flash'e kaydet
+                foreach ($errors as $field => $fieldErrors) {
+                    foreach ($fieldErrors as $error) {
+                        $this->flash('error', $error);
+                    }
+                }
+                
+                // Eski input'ları sakla
+                $_SESSION['old_input'] = $contactData;
+                
+                // Redirect ile hata sayfasına dön
+                $this->redirect('/contact');
                 return;
             }
         }
         
+        // GET request - normal sayfa gösterimi
         $data = [
-            'page_title' => 'İletişim'
+            'page_title' => 'İletişim',
+            'old_data' => $_SESSION['old_input'] ?? []
         ];
+        
+        // Eski input'ları temizle
+        unset($_SESSION['old_input']);
         
         $this->view('home/contact', $data);
     }

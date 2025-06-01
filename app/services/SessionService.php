@@ -4,6 +4,7 @@ class SessionService
 {
     public function __construct()
     {
+        // Session zaten BaseController'da başlatılmış olabilir
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }

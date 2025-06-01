@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? htmlspecialchars($page_title) . ' - ' : '' ?><?= htmlspecialchars($app_name) ?></title>
-    <meta name="csrf-token" content="<?= htmlspecialchars($csrf_token) ?>">
-    
+
     <style>
         * {
             margin: 0;

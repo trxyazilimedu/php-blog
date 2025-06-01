@@ -11,16 +11,51 @@ class Database
             $config = require APP_PATH . '/config/app.php';
             $db = $config['database'];
 
-            $dsn = "mysql:host={$db['host']};dbname={$db['database']};charset={$db['charset']}";
-            
-            $this->pdo = new PDO($dsn, $db['username'], $db['password'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ]);
+            // PDO MySQL driver'ı kontrolü
+            if (extension_loaded('pdo_mysql')) {
+                $dsn = "mysql:host={$db['host']};dbname={$db['database']};charset={$db['charset']}";
+                
+                $this->pdo = new PDO($dsn, $db['username'], $db['password'], [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ]);
+            }
+            // SQLite fallback (development için)
+            else if (extension_loaded('pdo_sqlite')) {
+                $dbPath = ROOT_PATH . '/database.sqlite';
+                $dsn = "sqlite:" . $dbPath;
+                
+                $this->pdo = new PDO($dsn, null, null, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                ]);
+                
+
+            }
+            else {
+                throw new Exception("Ne MySQL ne de SQLite PDO driver'ı bulunamadı. Lütfen php-mysql veya php-sqlite3 paketini yükleyin.");
+            }
             
         } catch (PDOException $e) {
-            throw new Exception("Veritabanı bağlantısı başarısız: " . $e->getMessage());
+            // MySQL bağlantısı başarısız olursa SQLite'a geç
+            if (extension_loaded('pdo_sqlite')) {
+                try {
+                    $dbPath = ROOT_PATH . '/database.sqlite';
+                    $dsn = "sqlite:" . $dbPath;
+                    
+                    $this->pdo = new PDO($dsn, null, null, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                    ]);
+                    
+
+                } catch (PDOException $sqliteError) {
+                    throw new Exception("Veritabanı bağlantısı başarısız. MySQL hatası: " . $e->getMessage() . " SQLite hatası: " . $sqliteError->getMessage());
+                }
+            } else {
+                throw new Exception("Veritabanı bağlantısı başarısız: " . $e->getMessage() . ". PDO driver kontrolü yapın.");
+            }
         }
     }
 

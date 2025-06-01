@@ -1,4 +1,55 @@
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
+# Simple Framework .htaccess
+# Apache için URL rewriting
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Framework ana dizini (eğer subdirectory'de ise ayarlayın)
+    # RewriteBase /simple-framework/public/
+    
+    # Mevcut dosya veya klasör değilse index.php'ye yönlendir
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+    
+    # Güvenlik: PHP dosyalarına doğrudan erişimi engelle
+    RewriteCond %{THE_REQUEST} /([^?\s]*)\.(php) [NC]
+    RewriteRule ^(.*)$ - [R=404,L]
+</IfModule>
+
+# mod_rewrite yoksa alternatif
+<IfModule !mod_rewrite.c>
+    # FallbackResource directive (Apache 2.2.16+)
+    FallbackResource /index.php
+</IfModule>
+
+# Güvenlik başlıkları
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Dosya türleri için cache
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+</IfModule>
+
+# Directory browsing'i kapat
+Options -Indexes
+
+# Hassas dosyaları gizle
+<Files ~ "^\.">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ~ "\.sql$">
+    Order allow,deny
+    Deny from all
+</Files>

@@ -2,11 +2,12 @@
 
 class FlashMessageService
 {
-    private $sessionService;
-
     public function __construct()
     {
-        $this->sessionService = new SessionService();
+        // Session zaten başlatılmış durumda
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 
     /**
@@ -14,14 +15,14 @@ class FlashMessageService
      */
     public function add($type, $message)
     {
-        $flashMessages = $this->sessionService->get('flash_messages', []);
+        $flashMessages = $_SESSION['flash_messages'] ?? [];
         
         if (!isset($flashMessages[$type])) {
             $flashMessages[$type] = [];
         }
         
         $flashMessages[$type][] = $message;
-        $this->sessionService->set('flash_messages', $flashMessages);
+        $_SESSION['flash_messages'] = $flashMessages;
     }
 
     /**
@@ -61,8 +62,8 @@ class FlashMessageService
      */
     public function getAll()
     {
-        $flashMessages = $this->sessionService->get('flash_messages', []);
-        $this->sessionService->remove('flash_messages');
+        $flashMessages = $_SESSION['flash_messages'] ?? [];
+        $_SESSION['flash_messages'] = [];
         return $flashMessages;
     }
 
@@ -80,7 +81,7 @@ class FlashMessageService
      */
     public function has($type = null)
     {
-        $flashMessages = $this->sessionService->get('flash_messages', []);
+        $flashMessages = $_SESSION['flash_messages'] ?? [];
         
         if ($type === null) {
             return !empty($flashMessages);
@@ -95,11 +96,11 @@ class FlashMessageService
     public function clear($type = null)
     {
         if ($type === null) {
-            $this->sessionService->remove('flash_messages');
+            $_SESSION['flash_messages'] = [];
         } else {
-            $flashMessages = $this->sessionService->get('flash_messages', []);
+            $flashMessages = $_SESSION['flash_messages'] ?? [];
             unset($flashMessages[$type]);
-            $this->sessionService->set('flash_messages', $flashMessages);
+            $_SESSION['flash_messages'] = $flashMessages;
         }
     }
 

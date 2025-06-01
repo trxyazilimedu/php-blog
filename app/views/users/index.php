@@ -1,88 +1,93 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title) ?></title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background-color: #f4f4f4; }
-        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; text-align: center; }
-        .nav { text-align: center; margin: 20px 0; }
-        .nav a { margin: 0 10px; color: #007bff; text-decoration: none; }
-        .nav a:hover { text-decoration: underline; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f8f9fa; }
-        .btn { padding: 8px 16px; margin: 2px; text-decoration: none; border-radius: 4px; display: inline-block; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-success { background-color: #28a745; color: white; }
-        .alert { padding: 15px; margin: 10px 0; border-radius: 4px; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1><?= htmlspecialchars($title) ?></h1>
-        
-        <div class="nav">
-            <a href="/">Ana Sayfa</a>
-            <a href="/users">Kullanıcılar</a>
-            <a href="/users/create">Yeni Kullanıcı</a>
-        </div>
-        
-        <?php if (isset($_GET['success'])): ?>
-            <div class="alert alert-success">Kullanıcı başarıyla oluşturuldu!</div>
-        <?php endif; ?>
-        
-        <?php if (isset($_GET['deleted'])): ?>
-            <div class="alert alert-success">Kullanıcı başarıyla silindi!</div>
-        <?php endif; ?>
-        
-        <?php if (isset($_GET['error'])): ?>
-            <div class="alert alert-danger">İşlem sırasında bir hata oluştu!</div>
-        <?php endif; ?>
-        
-        <table>
+<h1><?= htmlspecialchars($page_title ?? 'Kullanıcılar') ?></h1>
+
+<div style="display: flex; justify-content: between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <p style="color: #666; margin: 0;">Sistemdeki tüm kullanıcıları görüntüle ve yönet</p>
+    </div>
+    <div>
+        <a href="/users/create" style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 500;">
+            ➕ Yeni Kullanıcı
+        </a>
+    </div>
+</div>
+
+<?php if (empty($users)): ?>
+    <div style="text-align: center; padding: 3rem; background: #f8f9fa; border-radius: 10px; border: 1px solid #e9ecef;">
+        <h3 style="color: #666; margin-bottom: 1rem;">👥 Henüz kullanıcı bulunmuyor</h3>
+        <p style="color: #666; margin-bottom: 1.5rem;">İlk kullanıcıyı oluşturmak için aşağıdaki butona tıklayın.</p>
+        <a href="/users/create" style="background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500;">
+            Yeni Kullanıcı Oluştur
+        </a>
+    </div>
+<?php else: ?>
+    <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <table style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Ad Soyad</th>
-                    <th>E-posta</th>
-                    <th>Durum</th>
-                    <th>Kayıt Tarihi</th>
-                    <th>İşlemler</th>
+                <tr style="background: #f8f9fa;">
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e9ecef; font-weight: 600;">ID</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e9ecef; font-weight: 600;">Ad Soyad</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e9ecef; font-weight: 600;">E-posta</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e9ecef; font-weight: 600;">Rol</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e9ecef; font-weight: 600;">Durum</th>
+                    <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e9ecef; font-weight: 600;">Kayıt Tarihi</th>
+                    <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #e9ecef; font-weight: 600;">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($users)): ?>
-                    <tr>
-                        <td colspan="6" style="text-align: center;">Henüz kullanıcı bulunmuyor.</td>
+                <?php foreach ($users as $user): ?>
+                    <tr style="border-bottom: 1px solid #e9ecef; transition: background-color 0.2s;" 
+                        onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                        onmouseout="this.style.backgroundColor='transparent'">
+                        <td style="padding: 1rem; font-weight: 500; color: #667eea;">#<?= $user['id'] ?></td>
+                        <td style="padding: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #667eea; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.8rem;">
+                                    <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                                </div>
+                                <span style="font-weight: 500;"><?= htmlspecialchars($user['name']) ?></span>
+                            </div>
+                        </td>
+                        <td style="padding: 1rem; color: #666;"><?= htmlspecialchars($user['email']) ?></td>
+                        <td style="padding: 1rem;">
+                            <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500; background: <?= ($user['role'] ?? 'user') === 'admin' ? '#dc3545' : '#28a745' ?>; color: white;">
+                                <?= ucfirst($user['role'] ?? 'user') ?>
+                            </span>
+                        </td>
+                        <td style="padding: 1rem;">
+                            <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 500; background: <?= ($user['status'] ?? 'active') === 'active' ? '#28a745' : '#6c757d' ?>; color: white;">
+                                <?= ($user['status'] ?? 'active') === 'active' ? 'Aktif' : 'Pasif' ?>
+                            </span>
+                        </td>
+                        <td style="padding: 1rem; color: #666; font-size: 0.9rem;">
+                            <?= date('d.m.Y H:i', strtotime($user['created_at'])) ?>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                                <a href="/users/show/<?= $user['id'] ?>" 
+                                   style="background: #17a2b8; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 500;">
+                                    👁️ Görüntüle
+                                </a>
+                                <a href="/users/edit/<?= $user['id'] ?>" 
+                                   style="background: #ffc107; color: #212529; padding: 0.25rem 0.5rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem; font-weight: 500;">
+                                    ✏️ Düzenle
+                                </a>
+                                <form method="POST" action="/users/delete/<?= $user['id'] ?>" style="display: inline-block;">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                    <button type="submit" 
+                                            onclick="return confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')"
+                                            style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">
+                                        🗑️ Sil
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
-                <?php else: ?>
-                    <?php foreach ($users as $user): ?>
-                        <tr>
-                            <td><?= $user['id'] ?></td>
-                            <td><?= htmlspecialchars($user['name']) ?></td>
-                            <td><?= htmlspecialchars($user['email']) ?></td>
-                            <td>
-                                <span style="color: <?= $user['status'] === 'active' ? 'green' : 'red' ?>">
-                                    <?= $user['status'] === 'active' ? 'Aktif' : 'Pasif' ?>
-                                </span>
-                            </td>
-                            <td><?= date('d.m.Y H:i', strtotime($user['created_at'])) ?></td>
-                            <td>
-                                <a href="/users/show/<?= $user['id'] ?>" class="btn btn-primary">Görüntüle</a>
-                                <a href="/users/delete/<?= $user['id'] ?>" class="btn btn-danger" 
-                                   onclick="return confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')">Sil</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
-</body>
-</html>
+    
+    <div style="margin-top: 2rem; text-align: center; color: #666;">
+        <p style="margin: 0;">Toplam <?= count($users) ?> kullanıcı gösteriliyor</p>
+    </div>
+<?php endif; ?>

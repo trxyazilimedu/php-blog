@@ -1,112 +1,67 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title) ?></title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .nav {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .nav a {
-            margin: 0 10px;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .nav a:hover {
-            text-decoration: underline;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1><?= htmlspecialchars($title) ?></h1>
+<h1><?= htmlspecialchars($page_title ?? 'İletişim') ?></h1>
+
+<div style="max-width: 600px; margin: 0 auto;">
+    <p style="text-align: center; color: #666; margin-bottom: 2rem;">
+        Bizimle iletişime geçmek için aşağıdaki formu kullanabilirsiniz.
+    </p>
+
+    <form method="POST" action="/contact" style="background: #f8f9fa; padding: 2rem; border-radius: 10px; border: 1px solid #e9ecef;">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
         
-        <div class="nav">
-            <a href="/">Ana Sayfa</a>
-            <a href="/about">Hakkında</a>
-            <a href="/contact">İletişim</a>
-            <a href="/users">Kullanıcılar</a>
+        <div style="margin-bottom: 1.5rem;">
+            <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Adınız *</label>
+            <input 
+                type="text" 
+                id="name" 
+                name="name" 
+                value="<?= htmlspecialchars($old_data['name'] ?? old('name')) ?>"
+                required
+                style="width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; transition: border-color 0.3s;"
+                onfocus="this.style.borderColor='#667eea'"
+                onblur="this.style.borderColor='#ced4da'"
+            >
         </div>
         
-        <?php if (isset($success)): ?>
-            <p class="success"><?= htmlspecialchars($success) ?></p>
-        <?php endif; ?>
+        <div style="margin-bottom: 1.5rem;">
+            <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">E-posta Adresiniz *</label>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                value="<?= htmlspecialchars($old_data['email'] ?? old('email')) ?>"
+                required
+                style="width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; transition: border-color 0.3s;"
+                onfocus="this.style.borderColor='#667eea'"
+                onblur="this.style.borderColor='#ced4da'"
+            >
+        </div>
         
-        <?php if (isset($error)): ?>
-            <p class="error"><?= htmlspecialchars($error) ?></p>
-        <?php endif; ?>
+        <div style="margin-bottom: 1.5rem;">
+            <label for="message" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Mesajınız *</label>
+            <textarea 
+                id="message" 
+                name="message" 
+                rows="6" 
+                required
+                placeholder="Mesajınızı buraya yazın... (En az 10 karakter)"
+                style="width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; box-sizing: border-box; resize: vertical; transition: border-color 0.3s;"
+                onfocus="this.style.borderColor='#667eea'"
+                onblur="this.style.borderColor='#ced4da'"
+            ><?= htmlspecialchars($old_data['message'] ?? old('message')) ?></textarea>
+        </div>
         
-        <form method="POST" action="/contact">
-            <div class="form-group">
-                <label for="name">Adınız:</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">E-posta:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="message">Mesajınız:</label>
-                <textarea id="message" name="message" rows="5" required></textarea>
-            </div>
-            
-            <button type="submit">Gönder</button>
-        </form>
+        <button 
+            type="submit"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 2rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; width: 100%;"
+            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+        >
+            📤 Mesajı Gönder
+        </button>
+    </form>
+    
+    <div style="margin-top: 2rem; text-align: center; color: #666;">
+        <p style="margin-bottom: 1rem;">📧 Alternatif olarak doğrudan e-posta gönderebilirsiniz:</p>
+        <p style="font-weight: 600; color: #333;">info@simpleframework.com</p>
     </div>
-</body>
-</html>
+</div>
