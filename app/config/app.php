@@ -2,8 +2,8 @@
 
 return [
     'app' => [
-        'name' => 'Simple Framework',
-        'url' => 'http://localhost:8000',
+        'name' => 'Teknoloji Blog',
+        'url' => 'https://trxyazilimapi.xyz/',
         'debug' => true,
         'timezone' => 'Europe/Istanbul'
     ],
@@ -12,8 +12,8 @@ return [
         'driver' => 'mysql', // mysql
         'host' => 'localhost',
         'database' => 'trxyazilimapixyz_blog',
-        'username' => 'trxyazilimapixyz_blog',
-        'password' => '',
+        'username' => 'trxyazilimapixyz_blog    ',
+        'password' => '4!n0zR82k',
         'charset' => 'utf8mb4',
     ]
 ];
