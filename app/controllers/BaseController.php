@@ -1,14 +1,4 @@
 <?php
-
-/**
- * BaseController - Uygulama Seviyesi Controller
- * 
- * Bu sınıf, Core\Controller'dan extend eder.
- * Tüm temel işlevler artık Core\Controller'da bulunuyor.
- * 
- * Bu sınıf sadece uygulamaya özel özelleştirmeler için kullanılır.
- * Tüm uygulama controller'ları bu sınıftan extend edilmelidir.
- */
 abstract class BaseController extends Controller
 {
     /**
@@ -24,21 +14,10 @@ abstract class BaseController extends Controller
         $this->setApplicationSpecificGlobals();
     }
 
-    // ===========================================
-    // Application-Specific Initialization
-    // ===========================================
-
-    /**
-     * Özel uygulama servislerini başlatma
-     * Burada sadece bu uygulamaya özel servisler tanımlanır
-     */
     private function initializeCustomServices()
     {
-        // Örnek: Özel servisler
-        // $this->emailService = new EmailService();
-        // $this->paymentService = new PaymentService();
-        
-        // Lazy loading için services array'ine eklenebilir
+
+
         // $this->services['email'] = null; // Lazy load edilecek
     }
 
@@ -51,26 +30,17 @@ abstract class BaseController extends Controller
         // Sadece bu uygulamaya özel global veriler
         $this->addGlobalData('app_theme', 'default');
         $this->addGlobalData('app_locale', 'tr_TR');
-        
-        // Örnek: Kullanıcı tercihlerine göre tema
+
         $user = $this->getLoggedInUser();
         if ($user && isset($user['theme_preference'])) {
             $this->addGlobalData('app_theme', $user['theme_preference']);
         }
+        $this->addGlobalData('navigation_items', $this->getNavigationItems());
         
-        // Örnek: Özel navigasyon menüsü
-        $this->addGlobalData('custom_menu_items', $this->getCustomMenuItems());
+
     }
 
-    // ===========================================
-    // Application-Specific Helper Methods
-    // ===========================================
-
-    /**
-     * Özel menü öğelerini al
-     * Bu uygulamaya özel navigasyon öğeleri
-     */
-    private function getCustomMenuItems()
+    private function getNavigationItems()
     {
         $menuItems = [];
         
@@ -97,10 +67,6 @@ abstract class BaseController extends Controller
 
 
 
-
-    // ===========================================
-    // Business Logic Helpers (Uygulama Özel)
-    // ===========================================
 
     /**
      * Kullanıcı aktivitesi kaydet
