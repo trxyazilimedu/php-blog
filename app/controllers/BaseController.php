@@ -35,7 +35,7 @@ abstract class BaseController extends Controller
         if ($user && isset($user['theme_preference'])) {
             $this->addGlobalData('app_theme', $user['theme_preference']);
         }
-        $this->addGlobalData('navigation_items', $this->getNavigationItems());
+        $this->addGlobalData('navigation', $this->getNavigationItems());
         
 
     }
