@@ -109,6 +109,21 @@ class FrameworkHelper
                     require_once APP_PATH . '/services/FlashMessageService.php';
                     $services[$serviceName] = new FlashMessageService();
                     break;
+                case 'blog':
+                    require_once APP_PATH . '/models/Post.php';
+                    require_once APP_PATH . '/models/Category.php';
+                    require_once APP_PATH . '/services/BlogService.php';
+                    $services[$serviceName] = new BlogService();
+                    break;
+                case 'userManagement':
+                    require_once APP_PATH . '/services/UserManagementService.php';
+                    $services[$serviceName] = new UserManagementService();
+                    break;
+                case 'content':
+                    require_once APP_PATH . '/models/SiteContent.php';
+                    require_once APP_PATH . '/services/ContentManagementService.php';
+                    $services[$serviceName] = new ContentManagementService();
+                    break;
                 default:
                     throw new Exception("Service bulunamadı: " . $serviceName);
             }

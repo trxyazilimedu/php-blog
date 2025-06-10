@@ -10,7 +10,7 @@ return [
     
     'database' => [
         'driver' => 'mysql', // mysql
-        'host' => 'localhost',
+        'host' => 'cloud.trxyazilim.com',
         'database' => 'trxyazilimapixyz_blog',
         'username' => 'trxyazilimapixyz_blog',
         'password' => '4!n0zR82k',

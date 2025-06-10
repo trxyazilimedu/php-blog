@@ -16,9 +16,10 @@ abstract class BaseController extends Controller
 
     private function initializeCustomServices()
     {
-
-
-        // $this->services['email'] = null; // Lazy load edilecek
+        // Blog servisleri ekle
+        $this->services['blog'] = null; // Lazy load edilecek
+        $this->services['user'] = null; // Lazy load edilecek  
+        $this->services['content'] = null; // Lazy load edilecek
     }
 
     /**
