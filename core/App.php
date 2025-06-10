@@ -17,8 +17,8 @@ class App
         // Helper fonksiyonlarını yükle
         require_once APP_PATH . '/config/functions.php';
         
-        // Authorization sınıfını yükle
-        require_once APP_PATH . '/config/authorization.php';
+        // Core Authorization sınıfını yükle
+        require_once CORE_PATH . '/Authorization.php';
         
         // Router sınıfını yükle
         require_once CORE_PATH . '/Router.php';

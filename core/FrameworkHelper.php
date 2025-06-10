@@ -72,64 +72,129 @@ class FrameworkHelper
     }
 
     /**
-     * Model yükleme
+     * Model yükleme (dinamik ve güvenli)
      */
     public static function loadModel($model)
     {
+        // Statik model önbelleği
+        static $loadedModels = [];
+        
+        if (isset($loadedModels[$model])) {
+            return clone $loadedModels[$model];
+        }
+        
         $modelFile = APP_PATH . '/models/' . $model . '.php';
         
         if (file_exists($modelFile)) {
             require_once $modelFile;
-            return new $model();
+            
+            // Model sınıfının var olup olmadığını kontrol et
+            if (class_exists($model)) {
+                $loadedModels[$model] = new $model();
+                return clone $loadedModels[$model];
+            } else {
+                throw new Exception("Model sınıfı bulunamadı: " . $model);
+            }
         } else {
-            throw new Exception("Model dosyası bulunamadı: " . $model);
+            // Alternatif model dosya isimleri dene
+            $alternatives = [
+                $model . '.php',
+                ucfirst($model) . '.php',
+                strtolower($model) . '.php'
+            ];
+            
+            foreach ($alternatives as $alternative) {
+                $alternativeFile = APP_PATH . '/models/' . $alternative;
+                if (file_exists($alternativeFile)) {
+                    require_once $alternativeFile;
+                    
+                    // Farklı sınıf isimleri dene
+                    $classNames = [$model, ucfirst($model), strtolower($model)];
+                    foreach ($classNames as $className) {
+                        if (class_exists($className)) {
+                            $loadedModels[$model] = new $className();
+                            return clone $loadedModels[$model];
+                        }
+                    }
+                }
+            }
+            
+            throw new Exception("Model dosyası bulunamadı: " . $model . ". Aranan konumlar: " . implode(', ', array_map(function($alt) {
+                return APP_PATH . '/models/' . $alt;
+            }, $alternatives)));
         }
     }
 
     /**
-     * Service yükleme (lazy loading)
+     * Service yükleme (dinamik)
      */
     public static function loadService($serviceName, &$services = [])
     {
         if (!isset($services[$serviceName])) {
-            switch ($serviceName) {
-                case 'session':
-                    require_once APP_PATH . '/services/SessionService.php';
-                    $services[$serviceName] = new SessionService();
-                    break;
-                case 'auth':
-                    require_once APP_PATH . '/services/AuthService.php';
-                    $services[$serviceName] = new AuthService();
-                    break;
-                case 'validation':
-                    require_once APP_PATH . '/services/ValidationService.php';
-                    $services[$serviceName] = new ValidationService();
-                    break;
-                case 'flash':
-                    require_once APP_PATH . '/services/FlashMessageService.php';
-                    $services[$serviceName] = new FlashMessageService();
-                    break;
-                case 'blog':
-                    require_once APP_PATH . '/models/Post.php';
-                    require_once APP_PATH . '/models/Category.php';
-                    require_once APP_PATH . '/services/BlogService.php';
-                    $services[$serviceName] = new BlogService();
-                    break;
-                case 'userManagement':
-                    require_once APP_PATH . '/services/UserManagementService.php';
-                    $services[$serviceName] = new UserManagementService();
-                    break;
-                case 'content':
-                    require_once APP_PATH . '/models/SiteContent.php';
-                    require_once APP_PATH . '/services/ContentManagementService.php';
-                    $services[$serviceName] = new ContentManagementService();
-                    break;
-                default:
-                    throw new Exception("Service bulunamadı: " . $serviceName);
+            // Önce service dosyasının var olup olmadığını kontrol et
+            $serviceFile = APP_PATH . '/services/' . ucfirst($serviceName) . 'Service.php';
+            
+            if (file_exists($serviceFile)) {
+                // Service dosyasını yükle
+                require_once $serviceFile;
+                $serviceClass = ucfirst($serviceName) . 'Service';
+                
+                // Service'in bağımlılıklarını yükle (konfigurasyon tabanlı)
+                self::loadServiceDependencies($serviceName);
+                
+                $services[$serviceName] = new $serviceClass();
+            } else {
+                // Backward compatibility için eski sistem
+                $services[$serviceName] = self::loadLegacyService($serviceName);
             }
         }
         
         return $services[$serviceName];
+    }
+    
+    /**
+     * Service bağımlılıklarını yükle
+     */
+    private static function loadServiceDependencies($serviceName)
+    {
+        $dependencies = [
+            'blog' => ['BlogPost', 'BlogCategory', 'BlogComment'],
+            'content' => ['SiteContent'],
+            'userManagement' => ['User'],
+            // Diğer service'ler için bağımlılıklar eklenebilir
+        ];
+        
+        if (isset($dependencies[$serviceName])) {
+            foreach ($dependencies[$serviceName] as $model) {
+                $modelFile = APP_PATH . '/models/' . $model . '.php';
+                if (file_exists($modelFile)) {
+                    require_once $modelFile;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Eski service sistemi (backward compatibility)
+     */
+    private static function loadLegacyService($serviceName)
+    {
+        switch ($serviceName) {
+            case 'session':
+                require_once APP_PATH . '/services/SessionService.php';
+                return new SessionService();
+            case 'auth':
+                require_once APP_PATH . '/services/AuthService.php';
+                return new AuthService();
+            case 'validation':
+                require_once APP_PATH . '/services/ValidationService.php';
+                return new ValidationService();
+            case 'flash':
+                require_once APP_PATH . '/services/FlashMessageService.php';
+                return new FlashMessageService();
+            default:
+                throw new Exception("Service bulunamadı: " . $serviceName);
+        }
     }
 
     /**

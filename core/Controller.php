@@ -198,7 +198,12 @@ abstract class Controller
      */
     protected function requireAuth()
     {
-        return Authorization::requireAuth();
+        if (!$this->isUserLoggedIn()) {
+            $this->flash('error', 'Bu sayfaya erişmek için giriş yapmalısınız.');
+            $this->redirect('/login');
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -206,7 +211,43 @@ abstract class Controller
      */
     protected function requireAdmin()
     {
-        return Authorization::requireAdmin();
+        if (!$this->requireAuth()) {
+            return false;
+        }
+
+        $user = $this->getLoggedInUser();
+        if (!$user || $user['role'] !== 'admin') {
+            $this->flash('error', 'Bu sayfaya erişim yetkiniz bulunmuyor.');
+            $this->redirect('/');
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Writer yetkisi gerekli (writer veya admin)
+     */
+    protected function requireWriter()
+    {
+        if (!$this->requireAuth()) {
+            return false;
+        }
+
+        $user = $this->getLoggedInUser();
+        if (!$user || !in_array($user['role'], ['writer', 'admin'])) {
+            $this->flash('error', 'Bu sayfaya erişim yetkiniz bulunmuyor. Sadece yazarlar ve adminler erişebilir.');
+            $this->redirect('/');
+            return false;
+        }
+
+        // Writer ise ve durumu active değilse
+        if ($user['role'] === 'writer' && $user['status'] !== 'active') {
+            $this->flash('warning', 'Hesabınız henüz onaylanmamış. Admin onayını bekleyiniz.');
+            $this->redirect('/');
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -214,7 +255,17 @@ abstract class Controller
      */
     protected function requireRole($role)
     {
-        return Authorization::requireRole($role);
+        if (!$this->requireAuth()) {
+            return false;
+        }
+
+        $user = $this->getLoggedInUser();
+        if (!$user || $user['role'] !== $role) {
+            $this->flash('error', "Bu sayfa sadece {$role} rolüne sahip kullanıcılar içindir.");
+            $this->redirect('/');
+            return false;
+        }
+        return true;
     }
 
     /**

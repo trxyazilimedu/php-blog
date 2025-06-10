@@ -214,6 +214,9 @@ class Router
      */
     private static function runMiddleware($middleware)
     {
+        // Authorization sınıfını yükle
+        require_once CORE_PATH . '/Authorization.php';
+        
         foreach ($middleware as $middlewareName) {
             try {
                 if (!Authorization::checkMiddleware($middlewareName)) {

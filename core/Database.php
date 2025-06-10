@@ -34,7 +34,7 @@ class Database
 
             }
             else {
-                throw new Exception("Ne MySQL ne de SQLite PDO driver'ı bulunamadı. Lütfen php-mysql veya php-sqlite3 paketini yükleyin.");
+                throw new Exception("Ne MySQL ne de SQLite PDO driver'ı bulunamadı. Lütfen php-mysql  paketini yükleyin.");
             }
             
         } catch (PDOException $e) {

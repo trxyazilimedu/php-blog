@@ -36,38 +36,82 @@ abstract class BaseController extends Controller
         if ($user && isset($user['theme_preference'])) {
             $this->addGlobalData('app_theme', $user['theme_preference']);
         }
-        $this->addGlobalData('navigation', $this->getNavigationItems());
+        $this->addGlobalData('navigation', $this->getNavigation());
         
 
     }
 
-    private function getNavigationItems()
+    public function getNavigation()
     {
+        $currentUrl = $_SERVER['REQUEST_URI'] ?? '/';
         $menuItems = [];
         
-        // Admin kullanıcıları için özel menü
-        if ($this->isUserLoggedIn() && $this->isAdmin()) {
-            $menuItems[] = [
-                'title' => 'Admin Panel',
-                'url' => '/admin',
-                'icon' => '⚙️'
-            ];
-        }
+        // Ana menü öğeleri
+        $menuItems[] = [
+            'title' => 'Anasayfa',
+            'url' => '/',
+            'active' => $currentUrl === '/'
+        ];
         
-        // Kullanıcı girişi yapmışsa özel menü
+        $menuItems[] = [
+            'title' => 'Hakkında',
+            'url' => '/about',
+            'active' => $currentUrl === '/about'
+        ];
+        
+        $menuItems[] = [
+            'title' => 'İletişim',
+            'url' => '/contact',
+            'active' => $currentUrl === '/contact'
+        ];
+        
+        // Kullanıcı durumuna göre menü öğeleri
         if ($this->isUserLoggedIn()) {
+            // Admin kullanıcıları için admin panel
+            if ($this->isAdmin()) {
+                $menuItems[] = [
+                    'title' => 'Admin Panel',
+                    'url' => '/admin',
+                    'active' => strpos($currentUrl, '/admin') === 0
+                ];
+            }
+            
+            // Blog yazma yetkisi olan kullanıcılar için
+            $user = $this->getLoggedInUser();
+            if ($user && ($user['role'] === 'admin' || $user['role'] === 'writer')) {
+                $menuItems[] = [
+                    'title' => 'Blog Yaz',
+                    'url' => '/blog/create',
+                    'active' => $currentUrl === '/blog/create'
+                ];
+            }
+            
             $menuItems[] = [
                 'title' => 'Profilim',
-                'url' => '/users/profile',
-                'icon' => '👤'
+                'url' => '/profile',
+                'active' => $currentUrl === '/profile'
             ];
         }
-        
         return $menuItems;
     }
 
+    /**
+     * Kullanıcının admin olup olmadığını kontrol et
+     */
+    protected function isAdmin()
+    {
+        $user = $this->getLoggedInUser();
+        return $user && isset($user['role']) && $user['role'] === 'admin';
+    }
 
-
+    /**
+     * Kullanıcının writer olup olmadığını kontrol et
+     */
+    protected function isWriter()
+    {
+        $user = $this->getLoggedInUser();
+        return $user && isset($user['role']) && in_array($user['role'], ['writer', 'admin']);
+    }
 
     /**
      * Kullanıcı aktivitesi kaydet

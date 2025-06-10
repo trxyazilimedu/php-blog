@@ -21,7 +21,8 @@ class HomeController extends BaseController
             'categories' => $blogService->getCategoriesWithPostCount()
         ];
 
-        $this->view('blog/about', $data);
+        $data['navigation'] = $this->getNavigation();
+        $this->view('home/about', $data);
     }
 
     public function contact()
@@ -81,6 +82,9 @@ class HomeController extends BaseController
         // Eski input'ları temizle
         unset($_SESSION['old_input']);
         
-        $this->view('blog/contact', $data);
+        $data['navigation'] = $this->getNavigation();
+        $this->view('home/contact', $data);
     }
+
+
 }
