@@ -1,17 +1,16 @@
 <!-- Page Header -->
-<div class="bg-gradient-to-r from-primary-600 to-secondary-600 text-white rounded-2xl p-8 mb-8">
+<div class="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-2xl p-8 mb-8">
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold mb-2">
-                <i class="fas fa-<?= isset($post) ? 'edit' : 'plus' ?> mr-3"></i>
-                <?= isset($post) ? 'Blog Yazısını Düzenle' : 'Yeni Blog Yazısı' ?>
+                <i class="fas fa-edit mr-3"></i>Blog Yazısını Düzenle
             </h1>
             <p class="text-white/80">
-                <?= isset($post) ? 'Mevcut yazınızı düzenleyin ve değişikliklerinizi kaydedin.' : 'Yeni bir blog yazısı oluşturun ve okuyucularınızla paylaşın.' ?>
+                "<?= htmlspecialchars($post['title'] ?? '') ?>" yazısını düzenleyin ve değişikliklerinizi kaydedin.
             </p>
         </div>
         <div class="hidden md:block">
-            <i class="fas fa-pen-fancy text-6xl opacity-20"></i>
+            <i class="fas fa-edit text-6xl opacity-20"></i>
         </div>
     </div>
 </div>
@@ -21,7 +20,7 @@
     <!-- Main Form -->
     <div class="lg:col-span-3">
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <form method="POST" enctype="multipart/form-data" id="blog-form">
+            <form method="POST" enctype="multipart/form-data" id="blog-form" action="/blog/edit/<?= $post['id'] ?? '' ?>">
                 <!-- Form Header -->
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
@@ -211,8 +210,8 @@
                 <!-- Form Footer -->
                 <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
                     <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-                        <a href="/blog" class="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors text-center">
-                            <i class="fas fa-arrow-left mr-2"></i>İptal
+                        <a href="/blog/my-posts" class="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors text-center">
+                            <i class="fas fa-arrow-left mr-2"></i>Geri Dön
                         </a>
                         <button type="button" id="preview-btn" class="w-full sm:w-auto bg-blue-100 hover:bg-blue-200 text-blue-700 px-6 py-2 rounded-lg font-medium transition-colors">
                             <i class="fas fa-eye mr-2"></i>Önizle
@@ -220,8 +219,8 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                        <button type="submit" name="action" value="save" class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-                            <i class="fas fa-save mr-2"></i><?= isset($post) ? 'Güncelle' : 'Taslak Kaydet' ?>
+                        <button type="submit" name="action" value="save" class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                            <i class="fas fa-save mr-2"></i>Değişiklikleri Kaydet
                         </button>
                         <?php if (!isset($post) || $post['status'] === 'draft'): ?>
                             <button type="submit" name="action" value="publish" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
@@ -489,7 +488,7 @@ $(document).ready(function() {
         var action = $(document.activeElement).val();
         var loadingText = action === 'publish' ? 
             '<i class="fas fa-spinner fa-spin mr-2"></i>Yayınlanıyor...' : 
-            '<i class="fas fa-spinner fa-spin mr-2"></i>Kaydediliyor...';
+            '<i class="fas fa-spinner fa-spin mr-2"></i>Güncelleniyor...';
         
         $(document.activeElement).html(loadingText);
         
@@ -504,7 +503,7 @@ $(document).ready(function() {
                     if (action === 'publish') {
                         $btn.html('<i class="fas fa-globe mr-2"></i>Yayınla');
                     } else {
-                        $btn.html('<i class="fas fa-save mr-2"></i>Taslak Kaydet');
+                        $btn.html('<i class="fas fa-save mr-2"></i>Değişiklikleri Kaydet');
                     }
                 });
             }

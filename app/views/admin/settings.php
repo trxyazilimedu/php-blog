@@ -1,60 +1,19 @@
+<!-- Page Header -->
+<div class="bg-gradient-to-r from-orange-600 via-red-500 to-orange-700 text-white rounded-2xl p-8 mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold mb-2">
+                <i class="fas fa-cogs mr-3"></i>Site Ayarları
+            </h1>
+            <p class="text-white/80">Site ayarlarını ve navigasyon menüsünü yönetin.</p>
+        </div>
+        <div class="hidden md:block">
+            <i class="fas fa-sliders-h text-6xl opacity-20"></i>
+        </div>
+    </div>
+</div>
+
 <style>
-.admin-container {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.admin-sidebar {
-    background: white;
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    height: fit-content;
-}
-
-.admin-sidebar h6 {
-    margin-bottom: 1rem;
-    color: #333;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 0.5rem;
-}
-
-.admin-nav {
-    list-style: none;
-    padding: 0;
-}
-
-.admin-nav li {
-    margin-bottom: 0.5rem;
-}
-
-.admin-nav a {
-    display: block;
-    padding: 0.75rem 1rem;
-    text-decoration: none;
-    color: #555;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-
-.admin-nav a:hover {
-    background: #f0f0f0;
-    color: #333;
-}
-
-.admin-nav a.active {
-    background: #667eea;
-    color: white;
-}
-
-.admin-main {
-    background: white;
-    border-radius: 10px;
-    padding: 2rem;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
 
 .settings-sections {
     display: grid;
@@ -167,30 +126,19 @@
 }
 
 @media (max-width: 768px) {
-    .admin-container {
-        grid-template-columns: 1fr;
-    }
-    
     .form-row {
         grid-template-columns: 1fr;
     }
 }
 </style>
 
-<div class="admin-container">
-    <div class="admin-sidebar">
-        <h6>Admin Panel</h6>
-        <ul class="admin-nav">
-            <li><a href="/admin">Dashboard</a></li>
-            <li><a href="/admin/users">Kullanıcılar</a></li>
-            <li><a href="/admin/posts">Blog Yazıları</a></li>
-            <li><a href="/admin/categories">Kategoriler</a></li>
-            <li><a href="/admin/content">İçerik Yönetimi</a></li>
-            <li><a href="/admin/settings" class="active">Ayarlar</a></li>
-        </ul>
-    </div>
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Sidebar Navigation -->
+    <?php include __DIR__ . '/sidebar.php'; ?>
     
-    <div class="admin-main">
+    <!-- Main Content -->
+    <div class="lg:col-span-3">
+        <div class="bg-white rounded-2xl shadow-lg p-8">
         <h2>Site Ayarları</h2>
         
         <form method="POST">
@@ -334,6 +282,7 @@
             
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
         </form>
+        </div>
     </div>
 </div>
 

@@ -43,8 +43,7 @@ class ContentService
                 // Güncelle
                 $updateData = [
                     'content_value' => $value,
-                    'content_type' => $type,
-                    'updated_by' => $userId
+                    'content_type' => $type
                 ];
                 
                 $this->contentModel->update($existing[0]['id'], $updateData);
@@ -55,8 +54,7 @@ class ContentService
                     'content_value' => $value,
                     'content_type' => $type,
                     'page' => $page,
-                    'section' => $section,
-                    'updated_by' => $userId
+                    'section' => $section
                 ];
                 
                 $this->contentModel->create($createData);

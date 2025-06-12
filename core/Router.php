@@ -289,6 +289,35 @@ class Router
     }
 
     /**
+     * 404 sayfasını göster
+     */
+    public static function show404($message = "Sayfa bulunamadı")
+    {
+        http_response_code(404);
+        
+        try {
+            // Core Controller'ı yükle
+            require_once CORE_PATH . '/Controller.php';
+            require_once APP_PATH . '/controllers/BaseController.php';
+            require_once APP_PATH . '/controllers/ErrorController.php';
+            
+            // ErrorController instance oluştur
+            $controller = new ErrorController();
+            
+            // 404 sayfasını layout ile render et
+            $controller->notFound($message);
+        } catch (Exception $e) {
+            // Fallback: basit HTML
+            echo "<div style='text-align: center; padding: 50px; font-family: Arial, sans-serif;'>";
+            echo "<h1 style='color: #e74c3c;'>404 - Sayfa Bulunamadı</h1>";
+            echo "<p style='color: #666;'>" . htmlspecialchars($message) . "</p>";
+            echo "<a href='/' style='color: #3498db; text-decoration: none;'>Ana Sayfaya Dön</a>";
+            echo "</div>";
+        }
+        exit;
+    }
+
+    /**
      * Tüm route'ları al
      */
     public static function getRoutes()

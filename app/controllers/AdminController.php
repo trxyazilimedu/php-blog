@@ -5,6 +5,7 @@ class AdminController extends BaseController
     private $userManagementService;
     private $blogService;
     private $contentService;
+    private $navigationService;
 
     public function __construct()
     {
@@ -12,6 +13,7 @@ class AdminController extends BaseController
         $this->userManagementService = $this->service('userManagement');
         $this->blogService = $this->service('blog');
         $this->contentService = $this->service('content');
+        $this->navigationService = $this->service('navigation');
     }
 
     /**
@@ -132,11 +134,14 @@ class AdminController extends BaseController
 
         $postModel = $this->model('BlogPost');
         $posts = $postModel->query("
-            SELECT p.*, u.name as author_name, c.name as category_name 
+            SELECT p.*, u.name as author_name, 
+                   GROUP_CONCAT(DISTINCT c.name ORDER BY c.name SEPARATOR ', ') as category_names,
+                   COUNT(DISTINCT c.id) as category_count
             FROM blog_posts p 
             LEFT JOIN users u ON p.author_id = u.id 
             LEFT JOIN blog_post_categories bpc ON p.id = bpc.post_id
             LEFT JOIN blog_categories c ON bpc.category_id = c.id 
+            GROUP BY p.id, u.name
             ORDER BY p.created_at DESC
         ");
 
@@ -193,36 +198,6 @@ class AdminController extends BaseController
     /**
      * İçerik yönetimi
      */
-    public function content()
-    {
-        $this->requireAdmin();
-
-        if ($this->isPost()) {
-            $contentData = $this->input('content', []);
-            
-            if (!empty($contentData)) {
-                $result = $this->contentService->updateMultipleContent($contentData);
-                
-                if ($result['success']) {
-                    $this->flash('success', $result['message']);
-                } else {
-                    $this->flash('error', $result['message']);
-                }
-            }
-
-            $this->redirect('/admin/content');
-            return;
-        }
-
-        $allContent = $this->contentService->getAllContent();
-
-        $data = [
-            'page_title' => 'İçerik Yönetimi',
-            'content' => $allContent
-        ];
-
-        $this->view('admin/content', $data);
-    }
 
     /**
      * Düzenleme modunu aç/kapat
@@ -244,6 +219,12 @@ class AdminController extends BaseController
 
         if (!$this->isPost()) {
             $this->json(['success' => false, 'message' => 'Geçersiz istek']);
+            return;
+        }
+
+        // CSRF token validation
+        if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            $this->json(['success' => false, 'message' => 'Geçersiz CSRF token']);
             return;
         }
 
@@ -296,6 +277,8 @@ class AdminController extends BaseController
 
         $data = [
             'page_title' => 'Site Ayarları',
+            'menuItems' => $this->navigationService->getAllMenuItems(),
+            'possibleParents' => $this->navigationService->getPossibleParents(),
             'site_title' => $this->contentService->getContent('site_title'),
             'site_description' => $this->contentService->getContent('site_description'),
             'hero_title' => $this->contentService->getContent('hero_title'),
@@ -305,5 +288,98 @@ class AdminController extends BaseController
         ];
 
         $this->view('admin/settings', $data);
+    }
+
+    /**
+     * Navigation güncelleme
+     */
+    public function updateNavigation()
+    {
+        $this->requireAdmin();
+
+        if (!$this->isPost()) {
+            $this->json(['success' => false, 'message' => 'Geçersiz istek']);
+            return;
+        }
+
+        if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
+            return;
+        }
+
+        $id = $this->input('id');
+        $title = $this->input('title');
+        $url = $this->input('url');
+
+        if (empty($id) || empty($title) || empty($url)) {
+            $this->json(['success' => false, 'message' => 'Tüm alanlar gereklidir']);
+            return;
+        }
+
+        $data = [
+            'title' => $title,
+            'url' => $url
+        ];
+
+        $result = $this->navigationService->updateMenuItem($id, $data);
+
+        if ($result) {
+            $this->json(['success' => true, 'message' => 'Menü güncellendi']);
+        } else {
+            $this->json(['success' => false, 'message' => 'Güncelleme başarısız']);
+        }
+    }
+
+    /**
+     * Navigation öğesi oluştur
+     */
+    public function createNavigation()
+    {
+        $this->requireAdmin();
+
+        if (!$this->isPost()) {
+            $this->redirect('/admin/settings');
+            return;
+        }
+
+        $data = [
+            'title' => $this->input('title'),
+            'url' => $this->input('url'),
+            'icon' => $this->input('icon'),
+            'parent_id' => $this->input('parent_id') ?: null,
+            'permission_role' => $this->input('permission_role', 'all'),
+            'target' => $this->input('target', '_self')
+        ];
+
+        $result = $this->navigationService->createMenuItem($data);
+
+        if ($result) {
+            $this->flash('success', 'Menü öğesi oluşturuldu');
+        } else {
+            $this->flash('error', 'Oluşturma başarısız');
+        }
+
+        $this->redirect('/admin/settings');
+    }
+
+    /**
+     * Navigation öğesi sil
+     */
+    public function deleteNavigation($id)
+    {
+        $this->requireAdmin();
+
+        if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
+            return;
+        }
+
+        $result = $this->navigationService->deleteMenuItem($id);
+
+        if ($result) {
+            $this->json(['success' => true, 'message' => 'Menü öğesi silindi']);
+        } else {
+            $this->json(['success' => false, 'message' => 'Silme başarısız']);
+        }
     }
 }

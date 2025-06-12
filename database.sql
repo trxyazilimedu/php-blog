@@ -78,6 +78,19 @@ CREATE TABLE blog_comments (
     FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE
 );
 
+-- Blog Post Views tablosu (IP-based tracking için)
+CREATE TABLE blog_post_views (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    post_id INT NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    session_id VARCHAR(255),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE,
+    INDEX idx_post_ip_session (post_id, ip_address, session_id),
+    INDEX idx_created_at (created_at)
+);
+
 -- Contact Messages tablosu
 CREATE TABLE contact_messages (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -143,3 +156,40 @@ INSERT INTO site_content (content_key, content_value, content_type, page, sectio
 ('about_content', '<p>Bu site Simple Framework ile geliştirilmiştir.</p>', 'html', 'about', 'main'),
 ('contact_title', 'İletişim', 'text', 'contact', 'main'),
 ('contact_content', '<p>Bizimle iletişime geçmek için aşağıdaki formu kullanabilirsiniz.</p>', 'html', 'contact', 'main');
+
+-- Navigation menu tablosu
+CREATE TABLE navigation_menu (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    url VARCHAR(500) NOT NULL,
+    icon VARCHAR(100),
+    parent_id INT DEFAULT NULL,
+    sort_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    target ENUM('_self', '_blank') DEFAULT '_self',
+    permission_role ENUM('all', 'user', 'writer', 'admin') DEFAULT 'all',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES navigation_menu(id) ON DELETE CASCADE
+);
+
+-- Default navigation menu items
+INSERT INTO navigation_menu (title, url, icon, sort_order, permission_role) VALUES
+('Ana Sayfa', '/', 'fas fa-home', 1, 'all'),
+('Hakkında', '/about', 'fas fa-info-circle', 2, 'all'),
+('İletişim', '/contact', 'fas fa-envelope', 3, 'all'),
+('Blog', '/blog', 'fas fa-blog', 4, 'all'),
+('Admin Panel', '/admin', 'fas fa-cog', 5, 'admin'),
+('Blog Yaz', '/blog/create', 'fas fa-pen', 6, 'writer'),
+('Profil', '/profile', 'fas fa-user', 7, 'user');
+
+-- Sample blog categories
+INSERT INTO blog_categories (name, slug, description, color) VALUES
+('Teknoloji', 'teknoloji', 'Teknoloji dünyasından haberler ve gelişmeler', '#3b82f6'),
+('Yazılım', 'yazilim', 'Yazılım geliştirme, programlama dilleri ve araçları', '#10b981'),
+('Web Geliştirme', 'web-gelistirme', 'Frontend ve backend web geliştirme teknikleri', '#f59e0b'),
+('Mobil', 'mobil', 'Mobil uygulama geliştirme ve mobile teknolojiler', '#8b5cf6'),
+('Yapay Zeka', 'yapay-zeka', 'AI, makine öğrenmesi ve derin öğrenme', '#ef4444'),
+('DevOps', 'devops', 'DevOps araçları, CI/CD ve sistem yönetimi', '#06b6d4'),
+('Güvenlik', 'guvenlik', 'Siber güvenlik, veri koruması ve güvenlik protokolleri', '#84cc16'),
+('Veritabanı', 'veritabani', 'Veritabanı tasarımı, optimizasyon ve yönetimi', '#f97316');

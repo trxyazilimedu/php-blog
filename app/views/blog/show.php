@@ -35,10 +35,14 @@
                     </div>
                     
                     <!-- Categories -->
-                    <?php if (!empty($categories)): ?>
+                    <?php if (!empty($post['categories'])): ?>
                         <div class="mb-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-tags text-primary-500"></i>
+                                <span class="text-sm font-medium text-gray-600">Kategoriler:</span>
+                            </div>
                             <div class="flex flex-wrap gap-2">
-                                <?php foreach ($categories as $category): ?>
+                                <?php foreach ($post['categories'] as $category): ?>
                                     <a href="/blog/category/<?= htmlspecialchars($category['slug']) ?>" 
                                        class="bg-primary-100 hover:bg-primary-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium transition-colors">
                                         <?= htmlspecialchars($category['name']) ?>
@@ -198,6 +202,9 @@
                                 <i class="fas fa-paper-plane mr-2"></i>
                                 Yorum Gönder
                             </button>
+                            
+                            <!-- CSRF Token -->
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
                         </form>
                     </div>
                 </div>

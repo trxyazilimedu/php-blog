@@ -5,10 +5,10 @@
     
     <div class="relative z-10 text-center">
         <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-in editable-content" data-content-key="hero_title">
-            Teknoloji Dünyasına Hoş Geldiniz
+            <?= htmlspecialchars($contentService->getContent('hero_title', 'Teknoloji Dünyasına Hoş Geldiniz')) ?>
         </h1>
         <p class="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 animate-fade-in editable-content" data-content-key="hero_subtitle">
-            Yazılım, teknoloji trendleri ve dijital dünya hakkında kaliteli içerikler keşfedin
+            <?= htmlspecialchars($contentService->getContent('hero_subtitle', 'Yazılım, teknoloji trendleri ve dijital dünya hakkında kaliteli içerikler keşfedin')) ?>
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
             <a href="#latest-posts" class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
@@ -33,8 +33,11 @@
     <div class="lg:col-span-3">
         <div id="latest-posts" class="mb-8">
             <div class="flex items-center justify-between mb-8">
-                <h2 class="text-3xl font-bold text-gray-900 editable-content" data-content-key="latest_posts_title">
-                    <i class="fas fa-newspaper text-primary-500 mr-3"></i>Son Blog Yazıları
+                <h2 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-newspaper text-primary-500 mr-3"></i>
+                    <span class="editable-content" data-content-key="latest_posts_title">
+                        <?= htmlspecialchars($contentService->getContent('latest_posts_title', 'Son Blog Yazıları')) ?>
+                    </span>
                 </h2>
                 
                 <!-- Filter Buttons -->
@@ -134,10 +137,10 @@
                                 <i class="fas fa-file-alt text-4xl text-gray-400"></i>
                             </div>
                             <h3 class="text-2xl font-bold text-gray-900 mb-4 editable-content" data-content-key="no_posts_title">
-                                Henüz blog yazısı yok
+                                <?= htmlspecialchars($contentService->getContent('no_posts_title', 'Henüz blog yazısı yok')) ?>
                             </h3>
                             <p class="text-gray-600 mb-6 editable-content" data-content-key="no_posts_description">
-                                İlk blog yazısını yazmak için aşağıdaki butona tıklayın.
+                                <?= htmlspecialchars($contentService->getContent('no_posts_description', 'İlk blog yazısını yazmak için aşağıdaki butona tıklayın.')) ?>
                             </p>
                             <?php if ($is_logged_in && $user && ($user['role'] === 'admin' || $user['role'] === 'writer')): ?>
                                 <a href="/blog/create" class="bg-primary-500 hover:bg-primary-600 text-white px-8 py-3 rounded-full font-semibold transition-colors inline-flex items-center">
@@ -164,8 +167,11 @@
     <div class="lg:col-span-1">
         <!-- Categories Widget -->
         <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 hover-lift">
-            <h3 class="text-xl font-bold text-gray-900 mb-6 editable-content" data-content-key="categories_widget_title">
-                <i class="fas fa-tags text-primary-500 mr-2"></i>Kategoriler
+            <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-tags text-primary-500 mr-2"></i>
+                <span class="editable-content" data-content-key="categories_widget_title">
+                    <?= htmlspecialchars($contentService->getContent('categories_widget_title', 'Kategoriler')) ?>
+                </span>
             </h3>
             
             <div class="space-y-3">
@@ -196,8 +202,11 @@
         <!-- Popular Posts Widget -->
         <?php if (!empty($popular_posts)): ?>
             <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 hover-lift">
-                <h3 class="text-xl font-bold text-gray-900 mb-6 editable-content" data-content-key="popular_posts_title">
-                    <i class="fas fa-fire text-orange-500 mr-2"></i>Popüler Yazılar
+                <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-fire text-orange-500 mr-2"></i>
+                    <span class="editable-content" data-content-key="popular_posts_title">
+                        <?= htmlspecialchars($contentService->getContent('popular_posts_title', 'Popüler Yazılar')) ?>
+                    </span>
                 </h3>
                 
                 <div class="space-y-4">
@@ -228,11 +237,13 @@
         <div class="bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl shadow-lg p-6 text-white mb-8">
             <div class="text-center">
                 <i class="fas fa-envelope-open text-3xl mb-4 opacity-90"></i>
-                <h3 class="text-xl font-bold mb-3 editable-content" data-content-key="newsletter_title">
-                    Bültenimize Abone Olun
+                <h3 class="text-xl font-bold mb-3">
+                    <span class="editable-content" data-content-key="newsletter_title">
+                        <?= htmlspecialchars($contentService->getContent('newsletter_title', 'Bültenimize Abone Olun')) ?>
+                    </span>
                 </h3>
                 <p class="text-white/90 mb-6 editable-content" data-content-key="newsletter_description">
-                    Yeni yazılarımızdan haberdar olmak için e-posta adresinizi bırakın.
+                    <?= htmlspecialchars($contentService->getContent('newsletter_description', 'Yeni yazılarımızdan haberdar olmak için e-posta adresinizi bırakın.')) ?>
                 </p>
                 
                 <form class="space-y-3">
@@ -248,11 +259,14 @@
         
         <!-- About Widget -->
         <div class="bg-white rounded-2xl shadow-lg p-6 hover-lift">
-            <h3 class="text-xl font-bold text-gray-900 mb-4 editable-content" data-content-key="about_widget_title">
-                <i class="fas fa-info-circle text-primary-500 mr-2"></i>Hakkımızda
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <i class="fas fa-info-circle text-primary-500 mr-2"></i>
+                <span class="editable-content" data-content-key="about_widget_title">
+                    <?= htmlspecialchars($contentService->getContent('about_widget_title', 'Hakkımızda')) ?>
+                </span>
             </h3>
             <p class="text-gray-600 mb-4 editable-content" data-content-key="about_widget_content">
-                Teknoloji dünyasındaki en son gelişmeleri takip ediyor, yazılım geliştirme süreçleri hakkında içerikler üretiyoruz.
+                <?= htmlspecialchars($contentService->getContent('about_widget_content', 'Teknoloji dünyasındaki en son gelişmeleri takip ediyor, yazılım geliştirme süreçleri hakkında içerikler üretiyoruz.')) ?>
             </p>
             <a href="/about" class="text-primary-600 hover:text-primary-700 font-semibold inline-flex items-center group">
                 Daha Fazla Bilgi

@@ -161,6 +161,7 @@ class FrameworkHelper
             'blog' => ['BlogPost', 'BlogCategory', 'BlogComment'],
             'content' => ['SiteContent'],
             'userManagement' => ['User'],
+            'navigation' => ['NavigationMenu'],
             // Diğer service'ler için bağımlılıklar eklenebilir
         ];
         

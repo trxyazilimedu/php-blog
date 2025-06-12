@@ -77,20 +77,6 @@ class BlogPost extends Model
         return $this->query($sql, [$postId, $postId, $limit]);
     }
 
-    /**
-     * Popüler post'ları getir
-     */
-    public function getPopular($limit = 5)
-    {
-        $sql = "SELECT p.*, u.name as author_name
-                FROM {$this->table} p 
-                LEFT JOIN users u ON p.author_id = u.id
-                WHERE p.status = 'published'
-                ORDER BY p.views DESC, p.published_at DESC
-                LIMIT ?";
-        
-        return $this->query($sql, [$limit]);
-    }
 
     /**
      * Post view sayısını artır
@@ -133,10 +119,17 @@ class BlogPost extends Model
     }
 
     /**
-     * Popüler blog yazılarını getir (backward compatibility)
+     * Popüler blog yazılarını getir
      */
     public function getPopularPosts($limit = 5)
     {
-        return $this->getPopular($limit);
+        $sql = "SELECT p.*, u.name as author_name
+                FROM {$this->table} p 
+                LEFT JOIN users u ON p.author_id = u.id
+                WHERE p.status = 'published'
+                ORDER BY p.views DESC, p.published_at DESC
+                LIMIT ?";
+        
+        return $this->query($sql, [$limit]);
     }
 }

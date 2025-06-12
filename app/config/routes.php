@@ -19,6 +19,7 @@ Router::post('/contact', 'Home@contact');
 
 Router::get('/blog', 'Blog@index');
 Router::get('/blog/post/{slug}', 'Blog@show');
+Router::post('/blog/post/{slug}/comment', 'Blog@addComment');
 Router::get('/blog/category/{slug}', 'Blog@category');
 Router::get('/blog/search', 'Blog@search');
 
@@ -65,8 +66,6 @@ Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
     Router::get('/posts', 'Admin@posts');
     Router::get('/categories', 'Admin@categories');
     Router::post('/categories', 'Admin@categories');
-    Router::get('/content', 'Admin@content');
-    Router::post('/content', 'Admin@content');
     Router::get('/settings', 'Admin@settings');
     Router::post('/settings', 'Admin@settings');
     
@@ -75,6 +74,11 @@ Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
     Router::post('/update-content', 'Admin@updateContent');
     Router::post('/comments/approve/{id}', 'Admin@approveComment');
     Router::post('/comments/reject/{id}', 'Admin@rejectComment');
+    
+    // Navigation management
+    Router::post('/navigation/update', 'Admin@updateNavigation');
+    Router::post('/navigation/create', 'Admin@createNavigation');
+    Router::post('/navigation/delete/{id}', 'Admin@deleteNavigation');
 });
 
 // ===========================================

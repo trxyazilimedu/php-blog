@@ -20,6 +20,7 @@ abstract class BaseController extends Controller
         $this->services['blog'] = null; // Lazy load edilecek
         $this->services['user'] = null; // Lazy load edilecek  
         $this->services['content'] = null; // Lazy load edilecek
+        $this->services['navigation'] = null; // Lazy load edilecek
     }
 
     /**
@@ -38,61 +39,86 @@ abstract class BaseController extends Controller
         }
         $this->addGlobalData('navigation', $this->getNavigation());
         
+        // Footer içeriklerini ekle
+        $contentService = $this->service('content');
+        $this->addGlobalData('contentService', $contentService);
+        $this->createDefaultFooterContent($contentService);
+        
+        // Footer navigation ekle
+        try {
+            $navigationService = $this->service('navigation');
+            $this->addGlobalData('footerNavigation', $navigationService->getFooterNavigation(5));
+        } catch (Exception $e) {
+            $this->log('Footer navigation error: ' . $e->getMessage(), 'warning');
+            $this->addGlobalData('footerNavigation', []);
+        }
 
     }
 
     public function getNavigation()
     {
         $currentUrl = $_SERVER['REQUEST_URI'] ?? '/';
-        $menuItems = [];
         
-        // Ana menü öğeleri
-        $menuItems[] = [
-            'title' => 'Anasayfa',
-            'url' => '/',
-            'active' => $currentUrl === '/'
-        ];
-        
-        $menuItems[] = [
-            'title' => 'Hakkında',
-            'url' => '/about',
-            'active' => $currentUrl === '/about'
-        ];
-        
-        $menuItems[] = [
-            'title' => 'İletişim',
-            'url' => '/contact',
-            'active' => $currentUrl === '/contact'
-        ];
-        
-        // Kullanıcı durumuna göre menü öğeleri
-        if ($this->isUserLoggedIn()) {
-            // Admin kullanıcıları için admin panel
-            if ($this->isAdmin()) {
-                $menuItems[] = [
-                    'title' => 'Admin Panel',
-                    'url' => '/admin',
-                    'active' => strpos($currentUrl, '/admin') === 0
-                ];
-            }
-            
-            // Blog yazma yetkisi olan kullanıcılar için
+        try {
+            $navigationService = $this->service('navigation');
             $user = $this->getLoggedInUser();
-            if ($user && ($user['role'] === 'admin' || $user['role'] === 'writer')) {
-                $menuItems[] = [
-                    'title' => 'Blog Yaz',
-                    'url' => '/blog/create',
-                    'active' => $currentUrl === '/blog/create'
-                ];
-            }
+            $userRole = $user ? $user['role'] : 'all';
+            
+            return $navigationService->getNavigationForUser($userRole, $currentUrl);
+        } catch (Exception $e) {
+            // Fallback to default navigation if database not available
+            $this->log('Navigation service error: ' . $e->getMessage(), 'warning');
+            
+            $menuItems = [];
+            
+            // Ana menü öğeleri
+            $menuItems[] = [
+                'title' => 'Anasayfa',
+                'url' => '/',
+                'active' => $currentUrl === '/'
+            ];
             
             $menuItems[] = [
-                'title' => 'Profilim',
-                'url' => '/profile',
-                'active' => $currentUrl === '/profile'
+                'title' => 'Hakkında',
+                'url' => '/about',
+                'active' => $currentUrl === '/about'
             ];
+            
+            $menuItems[] = [
+                'title' => 'İletişim',
+                'url' => '/contact',
+                'active' => $currentUrl === '/contact'
+            ];
+            
+            // Kullanıcı durumuna göre menü öğeleri
+            if ($this->isUserLoggedIn()) {
+                // Admin kullanıcıları için admin panel
+                if ($this->isAdmin()) {
+                    $menuItems[] = [
+                        'title' => 'Admin Panel',
+                        'url' => '/admin',
+                        'active' => strpos($currentUrl, '/admin') === 0
+                    ];
+                }
+                
+                // Blog yazma yetkisi olan kullanıcılar için
+                $user = $this->getLoggedInUser();
+                if ($user && ($user['role'] === 'admin' || $user['role'] === 'writer')) {
+                    $menuItems[] = [
+                        'title' => 'Blog Yaz',
+                        'url' => '/blog/create',
+                        'active' => $currentUrl === '/blog/create'
+                    ];
+                }
+                
+                $menuItems[] = [
+                    'title' => 'Profilim',
+                    'url' => '/profile',
+                    'active' => $currentUrl === '/profile'
+                ];
+            }
+            return $menuItems;
         }
-        return $menuItems;
     }
 
     /**
@@ -195,5 +221,26 @@ abstract class BaseController extends Controller
     protected function getCurrentUser()
     {
         return $this->getLoggedInUser();
+    }
+
+    /**
+     * Default footer content oluştur
+     */
+    private function createDefaultFooterContent($contentService)
+    {
+        $defaults = [
+            'footer_description' => 'Modern web teknolojileri, yazılım geliştirme ve dijital dünya hakkında güncel içerikler paylaşıyoruz.',
+            'contact_email' => 'info@teknolojiblog.com',
+            'contact_phone' => '+90 (555) 123 45 67',
+            'contact_address' => 'İstanbul, Türkiye',
+            'footer_copyright' => 'Tüm hakları saklıdır.'
+        ];
+        
+        foreach ($defaults as $key => $value) {
+            $existing = $contentService->getContent($key);
+            if (empty($existing)) {
+                $contentService->updateContent($key, $value, 'footer', 'contact');
+            }
+        }
     }
 }

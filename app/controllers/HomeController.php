@@ -11,18 +11,46 @@ class HomeController extends BaseController
     public function about()
     {
         $contentService = $this->service('content');
-        $blogService = $this->service('blog');
+        
+        // Default içerikleri oluştur (eğer yoksa)
+        $this->createDefaultAboutContent($contentService);
         
         $data = [
-            'page_title' => 'Hakkımızda',
-            'about_title' => $contentService->getContent('about_title', 'Hakkımızda'),
-            'about_content' => $contentService->getContent('about_content', 'Bu blog sitesi hakkında bilgiler...'),
-            'popular_posts' => $blogService->getPopularPosts(5),
-            'categories' => $blogService->getCategoriesWithPostCount()
+            'page_title' => $contentService->getContent('about_hero_title', 'Hakkımızda'),
+            'contentService' => $contentService,
+            'framework_info' => [
+                'version' => '1.0.0',
+                'author' => 'Simple Framework Team',
+                'license' => 'MIT',
+                'github' => 'https://github.com/simple-framework'
+            ]
         ];
 
-        $data['navigation'] = $this->getNavigation();
         $this->view('home/about', $data);
+    }
+    
+    /**
+     * Default about page content oluştur
+     */
+    private function createDefaultAboutContent($contentService)
+    {
+        $defaults = [
+            'about_hero_title' => 'Hakkımızda',
+            'about_hero_subtitle' => 'Teknoloji dünyasındaki gelişmeleri takip edin, bilgi ve deneyimlerimizi paylaştığımız platformumuza hoş geldiniz.',
+            'about_mission_title' => 'Misyonumuz',
+            'about_mission_content' => 'Teknoloji alanındaki güncel gelişmeleri takip etmek ve bu bilgileri toplulukla paylaşarak kolektif öğrenmeyi desteklemek.',
+            'about_vision_title' => 'Vizyonumuz',
+            'about_vision_content' => 'Türkiye\'de teknoloji bilgisinin en güvenilir ve erişilebilir kaynaklarından biri olmak.',
+            'about_team_title' => 'Ekibimiz',
+            'about_team_content' => 'Deneyimli yazılımcılar ve teknoloji meraklılarından oluşan ekibimiz, sürekli öğrenme ve paylaşım odaklı yaklaşımla içerikler üretiyor.'
+        ];
+        
+        foreach ($defaults as $key => $value) {
+            $existing = $contentService->getContent($key);
+            if (empty($existing)) {
+                $contentService->updateContent($key, $value, 'about', 'main');
+            }
+        }
     }
 
     public function contact()

@@ -130,6 +130,14 @@ abstract class Controller
     // ===========================================
 
     /**
+     * CSRF token üretme
+     */
+    protected function generateCSRFToken()
+    {
+        return FrameworkHelper::generateCSRFToken();
+    }
+
+    /**
      * CSRF token doğrulama
      */
     protected function validateCSRFToken($token)

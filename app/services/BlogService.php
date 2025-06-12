@@ -58,8 +58,12 @@ class BlogService
         $post = $this->postModel->findBySlug($slug);
         
         if ($post && $post['status'] === 'published') {
-            // Görüntülenme sayısını artır
-            $this->postModel->incrementViews($post['id']);
+            // IP-based visit tracking
+            $this->trackVisit($post['id']);
+            
+            // Post kategorilerini getir
+            $post['categories'] = $this->getPostCategories($post['id']);
+            
             return $post;
         }
 
@@ -115,6 +119,11 @@ class BlogService
             return ['success' => false, 'errors' => $errors];
         }
 
+        // Slug oluştur
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateSlug($data['title']);
+        }
+
         // Kategorileri ayrı işle
         $categories = $data['categories'] ?? [];
         unset($data['categories']);
@@ -158,6 +167,11 @@ class BlogService
         $errors = $this->validatePostData($data, $id);
         if (!empty($errors)) {
             return ['success' => false, 'errors' => $errors];
+        }
+
+        // Slug güncelle (eğer başlık değişmişse)
+        if (empty($data['slug']) || ($data['title'] !== $post['title'] && empty($data['slug']))) {
+            $data['slug'] = $this->generateSlug($data['title'], $id);
         }
 
         // Kategorileri ayrı işle
@@ -213,6 +227,11 @@ class BlogService
             return ['success' => false, 'errors' => $errors];
         }
 
+        // Slug oluştur
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateCategorySlug($data['name']);
+        }
+
         if ($this->categoryModel->create($data)) {
             return ['success' => true, 'message' => 'Kategori başarıyla oluşturuldu!'];
         }
@@ -229,6 +248,11 @@ class BlogService
         $errors = $this->validateCategoryData($data, $id);
         if (!empty($errors)) {
             return ['success' => false, 'errors' => $errors];
+        }
+
+        // Slug kontrolü ve güncelleme
+        if (empty($data['slug'])) {
+            $data['slug'] = $this->generateCategorySlug($data['name'], $id);
         }
 
         if ($this->categoryModel->update($id, $data)) {
@@ -259,11 +283,14 @@ class BlogService
             $errors['content'] = 'İçerik en az 10 karakter olmalıdır.';
         }
 
-        if (isset($data['categories']) && !empty($data['categories'])) {
+        if (isset($data['categories']) && !empty($data['categories']) && is_array($data['categories'])) {
             foreach ($data['categories'] as $categoryId) {
+                // Skip empty values
+                if (empty($categoryId)) continue;
+                
                 $category = $this->categoryModel->findById($categoryId);
                 if (!$category) {
-                    $errors['categories'] = 'Geçersiz kategori seçimi.';
+                    $errors['categories'] = 'Geçersiz kategori seçimi: ' . $categoryId;
                     break;
                 }
             }
@@ -274,6 +301,58 @@ class BlogService
         }
 
         return $errors;
+    }
+
+    /**
+     * Slug oluştur
+     */
+    private function generateSlug($title, $excludeId = null)
+    {
+        // Türkçe karakterleri değiştir
+        $slug = str_replace(
+            ['ş', 'ğ', 'ü', 'ç', 'ı', 'ö', 'Ş', 'Ğ', 'Ü', 'Ç', 'İ', 'Ö'],
+            ['s', 'g', 'u', 'c', 'i', 'o', 'S', 'G', 'U', 'C', 'I', 'O'],
+            $title
+        );
+        
+        // Küçük harfe çevir, özel karakterleri kaldır
+        $slug = strtolower(trim($slug));
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/[\s-]+/', '-', $slug);
+        $slug = trim($slug, '-');
+        
+        // Boşsa default değer
+        if (empty($slug)) {
+            $slug = 'post-' . time();
+        }
+        
+        // Benzersizlik kontrolü
+        $originalSlug = $slug;
+        $counter = 1;
+        
+        while ($this->slugExists($slug, $excludeId)) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        return $slug;
+    }
+
+    /**
+     * Slug var mı kontrol et
+     */
+    private function slugExists($slug, $excludeId = null)
+    {
+        $sql = "SELECT id FROM blog_posts WHERE slug = ?";
+        $params = [$slug];
+        
+        if ($excludeId) {
+            $sql .= " AND id != ?";
+            $params[] = $excludeId;
+        }
+        
+        $result = $this->postModel->query($sql, $params);
+        return !empty($result);
     }
 
     /**
@@ -333,6 +412,50 @@ class BlogService
     }
 
     /**
+     * Post kategorilerini getir
+     */
+    private function getPostCategories($postId)
+    {
+        return $this->postModel->query(
+            "SELECT c.* FROM blog_categories c 
+             JOIN blog_post_categories pc ON c.id = pc.category_id 
+             WHERE pc.post_id = ?
+             ORDER BY c.name",
+            [$postId]
+        );
+    }
+
+    /**
+     * IP-based visit tracking
+     */
+    private function trackVisit($postId)
+    {
+        $userIP = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $sessionId = session_id();
+        
+        // Check if this IP/session already viewed this post in last 24 hours
+        $existingView = $this->postModel->query(
+            "SELECT id FROM blog_post_views 
+             WHERE post_id = ? AND (ip_address = ? OR session_id = ?) 
+             AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)",
+            [$postId, $userIP, $sessionId]
+        );
+        
+        if (empty($existingView)) {
+            // Record new view
+            $this->postModel->execute(
+                "INSERT INTO blog_post_views (post_id, ip_address, session_id, user_agent, created_at) 
+                 VALUES (?, ?, ?, ?, NOW())",
+                [$postId, $userIP, $sessionId, $userAgent]
+            );
+            
+            // Increment view counter
+            $this->postModel->incrementViews($postId);
+        }
+    }
+
+    /**
      * Kullanıcı blog istatistikleri
      */
     public function getUserStats($userId)
@@ -353,5 +476,57 @@ class BlogService
             'draft_posts' => 0,
             'total_views' => 0
         ];
+    }
+
+    /**
+     * Kategori slug oluştur
+     */
+    private function generateCategorySlug($name, $excludeId = null)
+    {
+        // Türkçe karakterleri değiştir
+        $slug = str_replace(
+            ['ş', 'ğ', 'ü', 'ç', 'ı', 'ö', 'Ş', 'Ğ', 'Ü', 'Ç', 'İ', 'Ö'],
+            ['s', 'g', 'u', 'c', 'i', 'o', 'S', 'G', 'U', 'C', 'I', 'O'],
+            $name
+        );
+        
+        // Küçük harfe çevir, özel karakterleri kaldır
+        $slug = strtolower(trim($slug));
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/[\s-]+/', '-', $slug);
+        $slug = trim($slug, '-');
+        
+        // Boşsa default değer
+        if (empty($slug)) {
+            $slug = 'kategori-' . time();
+        }
+        
+        // Benzersizlik kontrolü
+        $originalSlug = $slug;
+        $counter = 1;
+        
+        while ($this->categorySlugExists($slug, $excludeId)) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+        
+        return $slug;
+    }
+
+    /**
+     * Kategori slug var mı kontrol et
+     */
+    private function categorySlugExists($slug, $excludeId = null)
+    {
+        $sql = "SELECT id FROM blog_categories WHERE slug = ?";
+        $params = [$slug];
+        
+        if ($excludeId) {
+            $sql .= " AND id != ?";
+            $params[] = $excludeId;
+        }
+        
+        $result = $this->categoryModel->query($sql, $params);
+        return !empty($result);
     }
 }

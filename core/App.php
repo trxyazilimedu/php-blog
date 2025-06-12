@@ -49,9 +49,9 @@ class App
             echo "<p style='background: yellow; padding: 10px;'>Router handled: " . ($handled ? 'true' : 'false') . "</p>";
         }
         
-        // Eğer route bulunamazsa fallback controller sistemi
+        // Eğer route bulunamazsa 404 göster
         if (!$handled) {
-            $this->fallbackRouting($requestUri);
+            Router::show404("Sayfa bulunamadı: " . $requestUri);
         }
     }
     
@@ -133,13 +133,13 @@ class App
                 if (method_exists($controllerInstance, $method)) {
                     call_user_func_array([$controllerInstance, $method], $params);
                 } else {
-                    $this->error404("Method bulunamadı: " . $method);
+                    Router::show404("Method bulunamadı: " . $method);
                 }
             } else {
-                $this->error404("Controller sınıfı bulunamadı: " . $controller);
+                Router::show404("Controller sınıfı bulunamadı: " . $controller);
             }
         } else {
-           $this->error404("Controller dosyası bulunamadı: " . $controller);
+           Router::show404("Controller dosyası bulunamadı: " . $controller);
         }
     }
     
@@ -174,10 +174,20 @@ class App
     {
         http_response_code(404);
         
-        // Custom 404 sayfası varsa kullan
-        if (file_exists(APP_PATH . '/views/errors/404.php')) {
-            require_once APP_PATH . '/views/errors/404.php';
-        } else {
+        // Controller sistemi üzerinden 404 sayfasını göster
+        try {
+            // Core Controller'ı yükle
+            require_once CORE_PATH . '/Controller.php';
+            require_once APP_PATH . '/controllers/BaseController.php';
+            require_once APP_PATH . '/controllers/ErrorController.php';
+            
+            // ErrorController instance oluştur
+            $controller = new ErrorController();
+            
+            // 404 sayfasını layout ile render et
+            $controller->notFound($message);
+        } catch (Exception $e) {
+            // Fallback: basit HTML
             echo "<div style='text-align: center; padding: 50px; font-family: Arial, sans-serif;'>";
             echo "<h1 style='color: #e74c3c;'>404 - Sayfa Bulunamadı</h1>";
             echo "<p style='color: #666;'>" . htmlspecialchars($message) . "</p>";
