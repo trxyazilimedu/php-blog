@@ -29,8 +29,16 @@ class Model
         $columns = implode(',', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
         
-        $stmt = $this->db->prepare("INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})");
-        return $stmt->execute($data);
+        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES ({$placeholders})";
+        
+        $stmt = $this->db->prepare($sql);
+        $result = $stmt->execute($data);
+        
+        if ($result) {
+            return $this->db->lastInsertId();
+        } else {
+            return false;
+        }
     }
 
     public function update($id, $data)

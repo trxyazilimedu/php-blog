@@ -26,9 +26,8 @@
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-gray-900">Yazı Bilgileri</h2>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-sm text-gray-500">Otomatik Kaydet:</span>
-                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-edit mr-2"></i>Yeni blog yazısı oluşturuluyor
                         </div>
                     </div>
                 </div>
@@ -97,7 +96,7 @@
                         <div class="relative">
                             <!-- Quill Editor Container -->
                             <div id="quill-editor" style="min-height: 300px;" class="bg-white border border-gray-300 rounded-lg"></div>
-                            <textarea id="content" name="content" style="display: none;" required><?= isset($post) ? htmlspecialchars($post['content'] ?? '') : '' ?></textarea>
+                            <textarea id="content" name="content" style="display: none;"><?= isset($post) ? htmlspecialchars($post['content'] ?? '') : '' ?></textarea>
                         </div>
                         <div class="flex justify-between">
                             <p class="text-sm text-gray-500">Zengin metin editörü ile kolayca formatlayın</p>
@@ -128,25 +127,15 @@
                             <p class="text-sm text-gray-500">Birden fazla kategori seçebilirsiniz</p>
                         </div>
                         
-                        <!-- Status -->
+                        <!-- Status Info (Read-only) -->
                         <div class="space-y-2">
-                            <label for="status" class="block text-sm font-medium text-gray-700">
+                            <label class="block text-sm font-medium text-gray-700">
                                 <i class="fas fa-circle mr-2 text-primary-500"></i>Durum
                             </label>
-                            <select name="status" 
-                                    id="status"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                    required>
-                                <option value="draft" <?= (isset($post) && $post['status'] === 'draft') ? 'selected' : '' ?>>
-                                    📝 Taslak
-                                </option>
-                                <option value="published" <?= (isset($post) && $post['status'] === 'published') ? 'selected' : '' ?>>
-                                    ✅ Yayınlandı
-                                </option>
-                                <option value="archived" <?= (isset($post) && $post['status'] === 'archived') ? 'selected' : '' ?>>
-                                    📦 Arşivlendi
-                                </option>
-                            </select>
+                            <div class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-600">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Durum butonlarınıza göre otomatik belirlenecek
+                            </div>
                         </div>
                     </div>
                     
@@ -220,11 +209,11 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                        <button type="submit" name="action" value="save" class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                        <button type="submit" data-action="save" class="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
                             <i class="fas fa-save mr-2"></i><?= isset($post) ? 'Güncelle' : 'Taslak Kaydet' ?>
                         </button>
                         <?php if (!isset($post) || $post['status'] === 'draft'): ?>
-                            <button type="submit" name="action" value="publish" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                            <button type="submit" data-action="publish" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
                                 <i class="fas fa-globe mr-2"></i>Yayınla
                             </button>
                         <?php endif; ?>
@@ -232,6 +221,7 @@
                 </div>
                 
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                <input type="hidden" name="action" value="save" id="action-input">
             </form>
         </div>
     </div>
@@ -457,6 +447,13 @@ $(document).ready(function() {
     // Prevent multiple form submissions
     var isSubmitting = false;
     
+    // Handle button clicks to set action
+    $('button[type="submit"]').on('click', function(e) {
+        var action = $(this).data('action');
+        $('#action-input').val(action);
+        console.log('Button clicked, action set to:', action);
+    });
+    
     // Form submission - ensure Quill content is saved
     $('#blog-form').on('submit', function(e) {
         // Prevent multiple submissions
@@ -472,9 +469,19 @@ $(document).ready(function() {
         var title = $('#title').val().trim();
         var content = quill.getText().trim();
         
-        if (!title || !content) {
+        if (!title) {
             e.preventDefault();
-            alert('Başlık ve içerik alanları zorunludur!');
+            alert('Başlık alanı zorunludur!');
+            $('#title').focus();
+            return false;
+        }
+        
+        // Quill editor'da sadece boşluk/yeni satır varsa da geçersiz sayalım
+        var hasRealContent = content.replace(/\s/g, '').length > 0;
+        if (!hasRealContent || content.length < 10) {
+            e.preventDefault();
+            alert('İçerik alanı zorunludur ve en az 10 karakter olmalıdır!');
+            quill.focus();
             return false;
         }
         
@@ -486,12 +493,15 @@ $(document).ready(function() {
         $submitButtons.prop('disabled', true);
         
         // Update button text based on action
-        var action = $(document.activeElement).val();
-        var loadingText = action === 'publish' ? 
-            '<i class="fas fa-spinner fa-spin mr-2"></i>Yayınlanıyor...' : 
-            '<i class="fas fa-spinner fa-spin mr-2"></i>Kaydediliyor...';
-        
-        $(document.activeElement).html(loadingText);
+        var action = $('#action-input').val();
+        var $clickedButton = $('button[data-action="' + action + '"]');
+        if ($clickedButton.length) {
+            var loadingText = action === 'publish' ? 
+                '<i class="fas fa-spinner fa-spin mr-2"></i>Yayınlanıyor...' : 
+                '<i class="fas fa-spinner fa-spin mr-2"></i>Kaydediliyor...';
+            
+            $clickedButton.html(loadingText);
+        }
         
         // Re-enable form after timeout (fallback)
         setTimeout(function() {
@@ -500,11 +510,11 @@ $(document).ready(function() {
                 $submitButtons.prop('disabled', false);
                 $submitButtons.each(function() {
                     var $btn = $(this);
-                    var action = $btn.val();
+                    var action = $btn.data('action');
                     if (action === 'publish') {
                         $btn.html('<i class="fas fa-globe mr-2"></i>Yayınla');
                     } else {
-                        $btn.html('<i class="fas fa-save mr-2"></i>Taslak Kaydet');
+                        $btn.html('<i class="fas fa-save mr-2"></i><?= isset($post) ? "Güncelle" : "Taslak Kaydet" ?>');
                     }
                 });
             }
@@ -672,30 +682,7 @@ $(document).ready(function() {
         }
     });
     
-    // Auto-save functionality
-    let autoSaveTimeout;
-    function autoSave() {
-        clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(function() {
-            const formData = $('#blog-form').serialize() + '&action=autosave';
-            
-            $.ajax({
-                url: window.location.href,
-                method: 'POST',
-                data: formData,
-                success: function(response) {
-                    // Show auto-save indicator
-                    $('.animate-pulse').removeClass('bg-green-500').addClass('bg-blue-500');
-                    setTimeout(function() {
-                        $('.animate-pulse').removeClass('bg-blue-500').addClass('bg-green-500');
-                    }, 1000);
-                }
-            });
-        }, 5000); // Auto-save after 5 seconds of inactivity
-    }
-    
-    // Attach auto-save to form inputs
-    $('#blog-form input, #blog-form textarea, #blog-form select').on('input change', autoSave);
+    // Auto-save removed to prevent unwanted draft creation
     
     // Initialize counters
     $('#title').trigger('input');

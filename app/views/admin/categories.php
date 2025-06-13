@@ -167,15 +167,19 @@
                                             Görüntüle
                                         </a>
                                         
-                                        <button onclick="editCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>', '<?= htmlspecialchars($category['description'] ?? '') ?>', '<?= htmlspecialchars($category['color'] ?? '#10b981') ?>')"
-                                                class="inline-flex items-center px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-sm rounded-lg transition-colors">
+                                        <button class="edit-category-btn inline-flex items-center px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 text-sm rounded-lg transition-colors"
+                                                data-id="<?= $category['id'] ?>"
+                                                data-name="<?= htmlspecialchars($category['name']) ?>"
+                                                data-description="<?= htmlspecialchars($category['description'] ?? '') ?>"
+                                                data-color="<?= htmlspecialchars($category['color'] ?? '#10b981') ?>">
                                             <i class="fas fa-edit mr-1.5"></i>
                                             Düzenle
                                         </button>
                                     </div>
                                     
-                                    <button onclick="deleteCategory(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>')"
-                                            class="inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors">
+                                    <button class="delete-category-btn inline-flex items-center px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm rounded-lg transition-colors"
+                                            data-id="<?= $category['id'] ?>"
+                                            data-name="<?= htmlspecialchars($category['name']) ?>">
                                         <i class="fas fa-trash mr-1.5"></i>
                                         Sil
                                     </button>
@@ -342,14 +346,20 @@ $(document).ready(function() {
 // Edit category functionality
 let editCategoryId = null;
 
-function editCategory(id, name, description, color) {
+// Edit button click handler
+$(document).on('click', '.edit-category-btn', function() {
+    const id = $(this).data('id');
+    const name = $(this).data('name');
+    const description = $(this).data('description');
+    const color = $(this).data('color');
+    
     editCategoryId = id;
     $('#edit-id').val(id);
     $('#edit-name').val(name);
     $('#edit-description').val(description);
     $('#edit-color').val(color);
     $('#edit-modal').removeClass('hidden');
-}
+});
 
 function closeEditModal() {
     $('#edit-modal').addClass('hidden');
@@ -359,11 +369,15 @@ function closeEditModal() {
 // Delete category functionality
 let deleteCategoryId = null;
 
-function deleteCategory(id, name) {
+// Delete button click handler
+$(document).on('click', '.delete-category-btn', function() {
+    const id = $(this).data('id');
+    const name = $(this).data('name');
+    
     deleteCategoryId = id;
     $('#delete-category-name').text(name);
     $('#delete-modal').removeClass('hidden');
-}
+});
 
 function closeDeleteModal() {
     $('#delete-modal').addClass('hidden');

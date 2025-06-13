@@ -126,6 +126,204 @@ class AdminController extends BaseController
     }
 
     /**
+     * Kullanıcı oluşturma sayfası
+     */
+    public function createUser()
+    {
+        $this->requireAdmin();
+
+        if ($this->isPost()) {
+            // CSRF token kontrolü
+            if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+                $this->flash('error', 'Geçersiz CSRF token!');
+                $this->redirect('/admin/users/create');
+                return;
+            }
+
+            $userData = [
+                'name' => $this->input('name'),
+                'email' => $this->input('email'),
+                'password' => $this->input('password'),
+                'password_confirm' => $this->input('password_confirm'),
+                'role' => $this->input('role', 'user'),
+                'bio' => $this->input('bio', ''),
+                'status' => 'active'
+            ];
+
+            $currentUser = $this->getLoggedInUser();
+            $result = $this->userManagementService->createUser($userData, $currentUser['id']);
+
+            if ($result['success']) {
+                $this->flash('success', $result['message']);
+                $this->redirect('/admin/users');
+            } else {
+                if (isset($result['errors'])) {
+                    foreach ($result['errors'] as $field => $error) {
+                        $this->flash('error', $error);
+                    }
+                } else {
+                    $this->flash('error', $result['message']);
+                }
+            }
+        }
+
+        $data = [
+            'page_title' => 'Yeni Kullanıcı Oluştur',
+            'csrf_token' => $this->generateCSRFToken()
+        ];
+
+        $this->view('admin/user-create', $data);
+    }
+
+    /**
+     * Kullanıcı detayları sayfası
+     */
+    public function userDetail($userId)
+    {
+        $this->requireAdmin();
+
+        $userModel = $this->model('User');
+        $user = $userModel->findById($userId);
+
+        if (!$user) {
+            $this->flash('error', 'Kullanıcı bulunamadı!');
+            $this->redirect('/admin/users');
+            return;
+        }
+
+        // Kullanıcının blog yazıları
+        $postModel = $this->model('BlogPost');
+        $userPosts = $postModel->query(
+            "SELECT * FROM blog_posts WHERE author_id = ? ORDER BY created_at DESC LIMIT 10",
+            [$userId]
+        );
+
+        // Kullanıcının yorumları (eğer user tablosunda email ile eşleşirse)
+        $commentModel = $this->model('BlogComment');
+        $userComments = $commentModel->query(
+            "SELECT bc.*, bp.title as post_title 
+             FROM blog_comments bc 
+             LEFT JOIN blog_posts bp ON bc.post_id = bp.id 
+             WHERE bc.email = ? 
+             ORDER BY bc.created_at DESC LIMIT 10",
+            [$user['email']]
+        );
+
+        $data = [
+            'page_title' => 'Kullanıcı Detayları - ' . $user['name'],
+            'user' => $user,
+            'user_posts' => $userPosts,
+            'user_comments' => $userComments
+        ];
+
+        $this->view('admin/user-detail', $data);
+    }
+
+    /**
+     * Kullanıcı düzenleme sayfası
+     */
+    public function editUser($userId)
+    {
+        $this->requireAdmin();
+
+        $userModel = $this->model('User');
+        $user = $userModel->findById($userId);
+
+        if (!$user) {
+            $this->flash('error', 'Kullanıcı bulunamadı!');
+            $this->redirect('/admin/users');
+            return;
+        }
+
+        if ($this->isPost()) {
+            // CSRF token kontrolü
+            if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+                $this->flash('error', 'Geçersiz CSRF token!');
+                $this->redirect('/admin/users/edit/' . $userId);
+                return;
+            }
+
+            $updateData = [
+                'name' => $this->input('name'),
+                'email' => $this->input('email'),
+                'role' => $this->input('role'),
+                'bio' => $this->input('bio', ''),
+                'status' => $this->input('status')
+            ];
+
+            // Şifre değişikliği varsa
+            if (!empty($this->input('password'))) {
+                if ($this->input('password') !== $this->input('password_confirm')) {
+                    $this->flash('error', 'Şifreler eşleşmiyor!');
+                    $this->redirect('/admin/users/edit/' . $userId);
+                    return;
+                }
+                $updateData['password'] = password_hash($this->input('password'), PASSWORD_DEFAULT);
+            }
+
+            if ($userModel->update($userId, $updateData)) {
+                $this->flash('success', 'Kullanıcı başarıyla güncellendi!');
+                $this->redirect('/admin/users/' . $userId);
+            } else {
+                $this->flash('error', 'Kullanıcı güncellenirken bir hata oluştu!');
+            }
+        }
+
+        $data = [
+            'page_title' => 'Kullanıcı Düzenle - ' . $user['name'],
+            'user' => $user,
+            'csrf_token' => $this->generateCSRFToken()
+        ];
+
+        $this->view('admin/user-edit', $data);
+    }
+
+    /**
+     * Kullanıcı durumu değiştirme
+     */
+    public function changeUserStatus($userId)
+    {
+        $this->requireAdmin();
+
+        if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            $this->flash('error', 'Geçersiz CSRF token!');
+            $this->redirect('/admin/users/' . $userId);
+            return;
+        }
+
+        $status = $this->input('status');
+        $allowedStatuses = ['active', 'inactive', 'pending'];
+        
+        if (!in_array($status, $allowedStatuses)) {
+            $this->flash('error', 'Geçersiz durum!');
+            $this->redirect('/admin/users/' . $userId);
+            return;
+        }
+
+        $userModel = $this->model('User');
+        $user = $userModel->findById($userId);
+
+        if (!$user) {
+            $this->flash('error', 'Kullanıcı bulunamadı!');
+            $this->redirect('/admin/users');
+            return;
+        }
+
+        if ($userModel->update($userId, ['status' => $status])) {
+            $statusText = [
+                'active' => 'aktif',
+                'inactive' => 'deaktif',
+                'pending' => 'beklemede'
+            ];
+            $this->flash('success', 'Kullanıcı durumu "' . $statusText[$status] . '" olarak güncellendi!');
+        } else {
+            $this->flash('error', 'Kullanıcı durumu güncellenirken bir hata oluştu!');
+        }
+
+        $this->redirect('/admin/users/' . $userId);
+    }
+
+    /**
      * Gönderi yönetimi
      */
     public function posts()
@@ -161,23 +359,50 @@ class AdminController extends BaseController
         $this->requireAdmin();
 
         if ($this->isPost()) {
-            $categoryData = [
-                'name' => $this->input('name'),
-                'description' => $this->input('description'),
-                'color' => $this->input('color', '#667eea')
-            ];
-
-            $result = $this->blogService->createCategory($categoryData);
+            $action = $this->input('action', 'create');
             
-            if ($result['success']) {
-                $this->flash('success', $result['message']);
-            } else {
-                if (isset($result['errors'])) {
-                    foreach ($result['errors'] as $field => $error) {
-                        $this->flash('error', $error);
-                    }
+            if ($action === 'edit') {
+                // Kategori düzenleme
+                $categoryId = $this->input('id');
+                $categoryData = [
+                    'name' => $this->input('name'),
+                    'description' => $this->input('description'),
+                    'color' => $this->input('color', '#667eea')
+                ];
+
+                $result = $this->blogService->updateCategory($categoryId, $categoryData);
+                
+                if ($result['success']) {
+                    $this->flash('success', $result['message']);
                 } else {
-                    $this->flash('error', $result['message']);
+                    if (isset($result['errors'])) {
+                        foreach ($result['errors'] as $field => $error) {
+                            $this->flash('error', $error);
+                        }
+                    } else {
+                        $this->flash('error', $result['message']);
+                    }
+                }
+            } else {
+                // Kategori oluşturma
+                $categoryData = [
+                    'name' => $this->input('name'),
+                    'description' => $this->input('description'),
+                    'color' => $this->input('color', '#667eea')
+                ];
+
+                $result = $this->blogService->createCategory($categoryData);
+                
+                if ($result['success']) {
+                    $this->flash('success', $result['message']);
+                } else {
+                    if (isset($result['errors'])) {
+                        foreach ($result['errors'] as $field => $error) {
+                            $this->flash('error', $error);
+                        }
+                    } else {
+                        $this->flash('error', $result['message']);
+                    }
                 }
             }
 
@@ -189,10 +414,44 @@ class AdminController extends BaseController
 
         $data = [
             'page_title' => 'Kategori Yönetimi',
-            'categories' => $categories
+            'categories' => $categories,
+            'csrf_token' => $this->generateCSRFToken()
         ];
 
         $this->view('admin/categories', $data);
+    }
+
+    /**
+     * Kategori silme
+     */
+    public function deleteCategory($categoryId)
+    {
+        $this->requireAdmin();
+
+        if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            if ($this->isAjax()) {
+                $this->json(['success' => false, 'message' => 'Geçersiz CSRF token!']);
+                return;
+            }
+            $this->flash('error', 'Geçersiz CSRF token!');
+            $this->redirect('/admin/categories');
+            return;
+        }
+
+        $result = $this->blogService->deleteCategory($categoryId);
+        
+        if ($this->isAjax()) {
+            $this->json($result);
+            return;
+        }
+        
+        if ($result['success']) {
+            $this->flash('success', $result['message']);
+        } else {
+            $this->flash('error', $result['message']);
+        }
+        
+        $this->redirect('/admin/categories');
     }
 
     /**
@@ -338,7 +597,12 @@ class AdminController extends BaseController
         $this->requireAdmin();
 
         if (!$this->isPost()) {
-            $this->redirect('/admin/settings');
+            $this->json(['success' => false, 'message' => 'Geçersiz istek']);
+            return;
+        }
+
+        if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
             return;
         }
 
@@ -354,12 +618,10 @@ class AdminController extends BaseController
         $result = $this->navigationService->createMenuItem($data);
 
         if ($result) {
-            $this->flash('success', 'Menü öğesi oluşturuldu');
+            $this->json(['success' => true, 'message' => 'Menü öğesi başarıyla oluşturuldu']);
         } else {
-            $this->flash('error', 'Oluşturma başarısız');
+            $this->json(['success' => false, 'message' => 'Menü öğesi oluşturulamadı']);
         }
-
-        $this->redirect('/admin/settings');
     }
 
     /**

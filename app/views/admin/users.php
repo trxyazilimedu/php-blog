@@ -82,6 +82,12 @@
                         <i class="fas fa-list mr-2"></i>Tüm Kullanıcılar
                     </h3>
                     <div class="flex items-center space-x-4">
+                        <!-- Add User Button -->
+                        <a href="/admin/users/create" 
+                           class="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-user-plus mr-2"></i>Yeni Kullanıcı
+                        </a>
+                        
                         <!-- Search -->
                         <div class="relative">
                             <input type="text" 
@@ -126,7 +132,10 @@
                                                 </span>
                                             </div>
                                             <div>
-                                                <p class="font-semibold text-gray-900"><?= htmlspecialchars($user['name']) ?></p>
+                                                <a href="/admin/users/<?= $user['id'] ?>" 
+                                                   class="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                                    <?= htmlspecialchars($user['name']) ?>
+                                                </a>
                                                 <p class="text-sm text-gray-500">ID: <?= $user['id'] ?></p>
                                             </div>
                                         </div>

@@ -50,14 +50,32 @@ class BlogController extends BaseController
             return;
         }
 
+        // Check if user can moderate comments (writer/admin)
+        $currentUser = $this->getLoggedInUser();
+        $canModerate = $currentUser && in_array($currentUser['role'], ['writer', 'admin']);
+        
+        // Get approved comments for all users
+        $commentModel = $this->model('BlogComment');
+        $approvedComments = $commentModel->getApprovedComments($post['id']);
+        
         $data = [
             'page_title' => $post['title'],
             'post' => $post,
+            'comments' => $approvedComments,
             'popular_posts' => $this->blogService->getPopularPosts(5),
             'recent_posts' => $this->blogService->getRecentPosts(5),
-            'categories' => $this->blogService->getCategoriesWithPostCount(),
+            'allCategories' => $this->blogService->getCategoriesWithPostCount(),
+            'can_moderate' => $canModerate,
             'csrf_token' => $this->generateCSRFToken()
         ];
+        
+        // Add pending comments for moderators
+        if ($canModerate) {
+            $data['pending_comments'] = $commentModel->query(
+                "SELECT * FROM blog_comments WHERE post_id = ? AND status = 'pending' ORDER BY created_at DESC",
+                [$post['id']]
+            );
+        }
 
         $this->view('blog/show', $data);
     }
@@ -129,12 +147,24 @@ class BlogController extends BaseController
         }
 
         if ($this->isPost()) {
+            // Validate CSRF token
+            $csrfToken = $this->input('csrf_token');
+            if (!$this->validateCSRFToken($csrfToken)) {
+                $this->flash('error', 'Güvenlik hatası! Sayfayı yenileyin ve tekrar deneyin.');
+                $this->redirect('/blog/create');
+                return;
+            }
+            
+            // Determine action (save as draft or publish)
+            $action = $this->input('action', 'save');
+            $status = ($action === 'publish') ? 'published' : 'draft';
+            
             $postData = [
                 'title' => $this->input('title'),
                 'content' => $this->input('content'),
                 'excerpt' => $this->input('excerpt'),
                 'categories' => $this->input('categories', []),
-                'status' => $this->input('status', 'draft')
+                'status' => $status
             ];
 
 
@@ -166,7 +196,8 @@ class BlogController extends BaseController
 
         $data = [
             'page_title' => 'Yeni Gönderi',
-            'categories' => $this->blogService->getCategoriesWithPostCount()
+            'categories' => $this->blogService->getCategoriesWithPostCount(),
+            'csrf_token' => $this->generateCSRFToken()
         ];
 
         $this->view('blog/create', $data);
@@ -199,14 +230,25 @@ class BlogController extends BaseController
         }
 
         if ($this->isPost()) {
+            // Validate CSRF token
+            $csrfToken = $this->input('csrf_token');
+            if (!$this->validateCSRFToken($csrfToken)) {
+                $this->flash('error', 'Güvenlik hatası! Sayfayı yenileyin ve tekrar deneyin.');
+                $this->redirect('/blog/edit/' . $id);
+                return;
+            }
+            
+            // Determine action (save as draft or publish)
+            $action = $this->input('action', 'save');
+            $status = ($action === 'publish') ? 'published' : 'draft';
+            
             $postData = [
                 'title' => $this->input('title'),
                 'content' => $this->input('content'),
                 'excerpt' => $this->input('excerpt'),
                 'categories' => $this->input('categories', []),
-                'status' => $this->input('status', 'draft')
+                'status' => $status
             ];
-
 
             // Handle featured image upload
             if (isset($_FILES['featured_image']) && $_FILES['featured_image']['error'] === UPLOAD_ERR_OK) {
@@ -246,7 +288,8 @@ class BlogController extends BaseController
             'page_title' => 'Gönderi Düzenle',
             'post' => $post,
             'postCategories' => $postCategories,
-            'categories' => $this->blogService->getCategoriesWithPostCount()
+            'categories' => $this->blogService->getCategoriesWithPostCount(),
+            'csrf_token' => $this->generateCSRFToken()
         ];
 
         $this->view('blog/edit', $data);
@@ -354,7 +397,7 @@ class BlogController extends BaseController
 
         // Blog yazısını bul
         $blogPost = $this->model('BlogPost');
-        $post = $blogPost->getBySlug($slug);
+        $post = $blogPost->findBySlug($slug);
         
         if (!$post) {
             $this->flash('error', 'Blog yazısı bulunamadı!');
@@ -380,11 +423,10 @@ class BlogController extends BaseController
                 'name' => $name,
                 'email' => $email,
                 'website' => $website ?: null,
-                'content' => $comment,
+                'comment' => $comment,
                 'status' => 'pending', // Moderasyon için
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-                'created_at' => date('Y-m-d H:i:s')
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? ''
             ];
             
             $result = $commentModel->create($commentData);
@@ -455,7 +497,32 @@ class BlogController extends BaseController
             'newsletter_title' => 'Bültenimize Abone Olun',
             'newsletter_description' => 'Yeni yazılarımızdan haberdar olmak için e-posta adresinizi bırakın.',
             'about_widget_title' => 'Hakkımızda',
-            'about_widget_content' => 'Teknoloji dünyasındaki en son gelişmeleri takip ediyor, yazılım geliştirme süreçleri hakkında içerikler üretiyoruz.'
+            'about_widget_content' => 'Teknoloji dünyasındaki en son gelişmeleri takip ediyor, yazılım geliştirme süreçleri hakkında içerikler üretiyoruz.',
+            'latest_posts_button' => 'Son Yazılar',
+            'new_post_button' => 'Yeni Yazı Yaz',
+            'site_name' => 'Simple Framework',
+            // Home page content
+            'home_hero_title' => 'Modern Framework',
+            'home_hero_subtitle' => 'Güçlü, esnek ve modern web uygulamaları geliştirmek için ihtiyacınız olan her şey',
+            'home_features_title' => 'Framework Özellikleri',
+            'home_features_subtitle' => 'Modern web geliştirme için ihtiyacınız olan her şey burada',
+            'home_quickstart_title' => 'Hızlı Başlangıç',
+            'home_quickstart_subtitle' => 'Framework\'ünüz kullanıma hazır! Aşağıdaki özellikleri test edebilirsiniz',
+            'home_cta_title' => 'Başlamaya Hazır mısınız?',
+            'home_cta_subtitle' => 'Framework\'ümüzü keşfedin ve güçlü web uygulamaları geliştirmeye başlayın',
+            'home_card1_title' => 'Kullanıcı Yönetimi',
+            'home_card1_desc' => 'Kullanıcı CRUD işlemleri',
+            'home_card2_title' => 'İletişim Formu',
+            'home_card2_desc' => 'Form doğrulama ve gönderim',
+            'home_card3_title' => 'Blog Sistemi',
+            'home_card3_desc' => 'İçerik yönetim sistemi',
+            // Contact page content
+            'contact_hero_title' => 'İletişim',
+            'contact_hero_subtitle' => 'Bizimle iletişime geçmek için aşağıdaki formu kullanabilirsiniz. Size en kısa sürede dönüş yapacağız.',
+            'contact_email' => 'info@simpleframework.com',
+            'contact_phone' => '+90 (555) 123 45 67',
+            'contact_address' => 'İstanbul, Türkiye',
+            'contact_hours' => 'Pzt-Cum 09:00-18:00'
         ];
         
         foreach ($defaults as $key => $value) {
@@ -463,6 +530,65 @@ class BlogController extends BaseController
             if (empty($existing)) {
                 $this->contentService->updateContent($key, $value, 'blog', 'main');
             }
+        }
+    }
+    
+    /**
+     * Approve comment (writer/admin only)
+     */
+    public function approveComment($commentId)
+    {
+        $this->requireAuth();
+        
+        $currentUser = $this->getLoggedInUser();
+        if (!in_array($currentUser['role'], ['writer', 'admin'])) {
+            $this->flash('error', 'Bu işlem için yetkiniz bulunmuyor.');
+            $this->redirect('/blog');
+            return;
+        }
+        
+        // Validate CSRF token
+        if ($this->isPost()) {
+            $csrfToken = $this->input('csrf_token');
+            if (!$this->validateCSRFToken($csrfToken)) {
+                $this->flash('error', 'Güvenlik hatası! Sayfayı yenileyin ve tekrar deneyin.');
+                $this->redirect('/blog');
+                return;
+            }
+        }
+        
+        try {
+            $commentModel = $this->model('BlogComment');
+            $comment = $commentModel->findById($commentId);
+            
+            if (!$comment) {
+                $this->flash('error', 'Yorum bulunamadı.');
+                $this->redirect('/blog');
+                return;
+            }
+            
+            // Update comment status to approved
+            $result = $commentModel->update($commentId, ['status' => 'approved']);
+            
+            if ($result) {
+                $this->flash('success', 'Yorum başarıyla onaylandı.');
+            } else {
+                $this->flash('error', 'Yorum onaylanırken bir hata oluştu.');
+            }
+            
+            // Get post slug to redirect back
+            $postModel = $this->model('BlogPost');
+            $post = $postModel->findById($comment['post_id']);
+            
+            if ($post) {
+                $this->redirect('/blog/post/' . $post['slug']);
+            } else {
+                $this->redirect('/blog');
+            }
+            
+        } catch (Exception $e) {
+            $this->flash('error', 'Yorum onaylanırken bir hata oluştu: ' . $e->getMessage());
+            $this->redirect('/blog');
         }
     }
 

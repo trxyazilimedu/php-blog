@@ -233,4 +233,70 @@ class UserManagementService
 
         return ['success' => false, 'message' => 'Durum güncellenirken bir hata oluştu!'];
     }
+
+    /**
+     * Admin tarafından kullanıcı oluşturma
+     */
+    public function createUser($userData, $adminId)
+    {
+        // Validasyon
+        $errors = [];
+
+        if (empty($userData['name'])) {
+            $errors['name'] = 'Ad soyad alanı zorunludur.';
+        }
+
+        if (empty($userData['email'])) {
+            $errors['email'] = 'E-posta alanı zorunludur.';
+        } elseif (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors['email'] = 'Geçerli bir e-posta adresi girin.';
+        } elseif ($this->userModel->findByEmail($userData['email'])) {
+            $errors['email'] = 'Bu e-posta adresi zaten kullanılıyor.';
+        }
+
+        if (empty($userData['password'])) {
+            $errors['password'] = 'Şifre alanı zorunludur.';
+        } elseif (strlen($userData['password']) < 6) {
+            $errors['password'] = 'Şifre en az 6 karakter olmalıdır.';
+        }
+
+        if ($userData['password'] !== $userData['password_confirm']) {
+            $errors['password_confirm'] = 'Şifreler eşleşmiyor.';
+        }
+
+        $allowedRoles = ['user', 'writer', 'admin'];
+        if (!in_array($userData['role'], $allowedRoles)) {
+            $errors['role'] = 'Geçersiz rol seçimi.';
+        }
+
+        if (!empty($errors)) {
+            return [
+                'success' => false,
+                'message' => 'Validasyon hataları var.',
+                'errors' => $errors
+            ];
+        }
+
+        // Kullanıcı verilerini hazırla
+        $createData = [
+            'name' => trim($userData['name']),
+            'email' => trim($userData['email']),
+            'password' => password_hash($userData['password'], PASSWORD_DEFAULT),
+            'role' => $userData['role'],
+            'bio' => trim($userData['bio'] ?? ''),
+            'status' => $userData['status'] ?? 'active'
+        ];
+
+        if ($this->userModel->create($createData)) {
+            return [
+                'success' => true,
+                'message' => 'Kullanıcı başarıyla oluşturuldu!'
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => 'Kullanıcı oluşturulurken bir hata oluştu!'
+        ];
+    }
 }

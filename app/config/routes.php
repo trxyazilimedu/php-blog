@@ -20,6 +20,7 @@ Router::post('/contact', 'Home@contact');
 Router::get('/blog', 'Blog@index');
 Router::get('/blog/post/{slug}', 'Blog@show');
 Router::post('/blog/post/{slug}/comment', 'Blog@addComment');
+Router::post('/blog/comment/{id}/approve', 'Blog@approveComment');
 Router::get('/blog/category/{slug}', 'Blog@category');
 Router::get('/blog/search', 'Blog@search');
 
@@ -61,11 +62,18 @@ Router::group(['middleware' => ['writer']], function() {
 Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
     Router::get('/', 'Admin@index');
     Router::get('/users', 'Admin@users');
+    Router::get('/users/create', 'Admin@createUser');
+    Router::post('/users/create', 'Admin@createUser');
+    Router::get('/users/edit/{id}', 'Admin@editUser');
+    Router::post('/users/edit/{id}', 'Admin@editUser');
+    Router::post('/users/status/{id}', 'Admin@changeUserStatus');
+    Router::get('/users/{id}', 'Admin@userDetail');
     Router::post('/approve-user/{id}', 'Admin@approveUser');
     Router::post('/reject-user/{id}', 'Admin@rejectUser');
     Router::get('/posts', 'Admin@posts');
     Router::get('/categories', 'Admin@categories');
     Router::post('/categories', 'Admin@categories');
+    Router::post('/categories/delete/{id}', 'Admin@deleteCategory');
     Router::get('/settings', 'Admin@settings');
     Router::post('/settings', 'Admin@settings');
     

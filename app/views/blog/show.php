@@ -53,7 +53,7 @@
                     <?php endif; ?>
                     
                     <!-- Content -->
-                    <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+                    <div class="prose prose-lg max-w-none text-gray-800 leading-relaxed blog-content">
                         <?= $post['content'] ?>
                     </div>
                 </div>
@@ -115,16 +115,104 @@
             <div class="mt-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Yorumlar</h2>
                 
+                <!-- Pending Comments (Only for Moderators) -->
+                <?php if ($can_moderate && !empty($pending_comments)): ?>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-clock text-yellow-600 mr-2"></i>
+                            <h3 class="text-lg font-semibold text-yellow-800">Onay Bekleyen Yorumlar</h3>
+                            <span class="ml-2 bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                <?= count($pending_comments) ?>
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <?php foreach ($pending_comments as $pendingComment): ?>
+                                <div class="bg-white rounded-lg border border-yellow-200 p-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="font-semibold text-gray-900">
+                                                <?= htmlspecialchars($pendingComment['name']) ?>
+                                            </h4>
+                                            <span class="text-sm text-gray-500">
+                                                (<?= htmlspecialchars($pendingComment['email']) ?>)
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+                                            <span class="text-xs text-gray-500">
+                                                <?= date('d.m.Y H:i', strtotime($pendingComment['created_at'])) ?>
+                                            </span>
+                                            <form method="POST" action="/blog/comment/<?= $pendingComment['id'] ?>/approve" class="inline">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                                <button type="submit" 
+                                                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                                                        onclick="return confirm('Bu yorumu onaylamak istediğinizden emin misiniz?')">
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    Onayla
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        <?= nl2br(htmlspecialchars($pendingComment['comment'])) ?>
+                                    </p>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
                 <!-- Existing Comments -->
                 <?php if (!empty($comments)): ?>
                     <div class="space-y-6 mb-8">
                         <?php foreach ($comments as $comment): ?>
                             <div class="bg-white rounded-xl shadow-lg p-6">
-                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-                                    <h4 class="font-semibold text-gray-900">
-                                        <?= htmlspecialchars($comment['name']) ?>
-                                    </h4>
-                                    <span class="text-sm text-gray-500">
+                                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-2">
+                                            <?php if (!empty($comment['website'])): ?>
+                                                <a href="<?= htmlspecialchars($comment['website']) ?>" 
+                                                   target="_blank" 
+                                                   rel="noopener noreferrer"
+                                                   class="font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+                                                    <?= htmlspecialchars($comment['name']) ?>
+                                                    <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <h4 class="font-semibold text-gray-900">
+                                                    <?= htmlspecialchars($comment['name']) ?>
+                                                </h4>
+                                            <?php endif; ?>
+                                        </div>
+                                        
+                                        <!-- Email/Website info for moderators -->
+                                        <?php if ($can_moderate): ?>
+                                            <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-2">
+                                                <span class="flex items-center">
+                                                    <i class="fas fa-envelope mr-1"></i>
+                                                    <?= htmlspecialchars($comment['email']) ?>
+                                                </span>
+                                                <?php if (!empty($comment['website'])): ?>
+                                                    <span class="flex items-center">
+                                                        <i class="fas fa-globe mr-1"></i>
+                                                        <a href="<?= htmlspecialchars($comment['website']) ?>" 
+                                                           target="_blank" 
+                                                           rel="noopener noreferrer"
+                                                           class="hover:text-primary-600 transition-colors">
+                                                            <?= htmlspecialchars($comment['website']) ?>
+                                                        </a>
+                                                    </span>
+                                                <?php endif; ?>
+                                                <?php if (!empty($comment['ip_address'])): ?>
+                                                    <span class="flex items-center">
+                                                        <i class="fas fa-map-marker-alt mr-1"></i>
+                                                        <?= htmlspecialchars($comment['ip_address']) ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <span class="text-sm text-gray-500 mt-2 sm:mt-0">
                                         <?= date('d.m.Y H:i', strtotime($comment['created_at'])) ?>
                                     </span>
                                 </div>
@@ -287,3 +375,88 @@
         </div>
     </div>
 </div>
+
+<!-- Blog Content Styling -->
+<style>
+.blog-content {
+    line-height: 1.8;
+}
+
+.blog-content p {
+    margin-bottom: 1rem;
+    color: #374151;
+    font-size: 1.1rem;
+}
+
+.blog-content h1, .blog-content h2, .blog-content h3, .blog-content h4, .blog-content h5, .blog-content h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.blog-content h1 { font-size: 2rem; }
+.blog-content h2 { font-size: 1.75rem; }
+.blog-content h3 { font-size: 1.5rem; }
+
+.blog-content ul, .blog-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.blog-content li {
+    margin-bottom: 0.5rem;
+}
+
+.blog-content blockquote {
+    border-left: 4px solid #3b82f6;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.blog-content code {
+    background-color: #f1f5f9;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    color: #dc2626;
+}
+
+.blog-content pre {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.blog-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.blog-content a {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.blog-content a:hover {
+    color: #1d4ed8;
+}
+
+.blog-content strong, .blog-content b {
+    font-weight: 600;
+    color: #111827;
+}
+
+.blog-content em, .blog-content i {
+    font-style: italic;
+}
+</style>

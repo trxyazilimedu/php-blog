@@ -13,553 +13,300 @@
     </div>
 </div>
 
-<style>
-
-.posts-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background: #667eea;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #5a6fd8;
-}
-
-.btn-success {
-    background: #28a745;
-    color: white;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.btn-success:hover {
-    background: #218838;
-}
-
-.btn-warning {
-    background: #ffc107;
-    color: #212529;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.btn-warning:hover {
-    background: #e0a800;
-}
-
-.btn-danger {
-    background: #dc3545;
-    color: white;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.btn-danger:hover {
-    background: #c82333;
-}
-
-.posts-filters {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.filter-label {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #333;
-}
-
-.filter-control {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-}
-
-.posts-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-}
-
-.posts-table th,
-.posts-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-.posts-table th {
-    background: #f8f9fa;
-    font-weight: 600;
-    color: #333;
-    position: sticky;
-    top: 0;
-}
-
-.posts-table tr:hover {
-    background: #f8f9fa;
-}
-
-.post-title {
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.post-title a {
-    color: #333;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.post-title a:hover {
-    color: #667eea;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-.status-published {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status-draft {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.status-archived {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.author-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.author-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #667eea;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 0.8rem;
-}
-
-.post-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 0.8rem;
-    color: #666;
-}
-
-.post-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.no-posts {
-    text-align: center;
-    padding: 3rem;
-    color: #666;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-
-.no-posts h4 {
-    margin-bottom: 1rem;
-    color: #333;
-}
-
-.bulk-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin: 1rem 0;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.bulk-checkbox {
-    margin-right: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .posts-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-    
-    .posts-filters {
-        flex-direction: column;
-    }
-    
-    .posts-table {
-        font-size: 0.8rem;
-    }
-    
-    .posts-table th,
-    .posts-table td {
-        padding: 0.5rem;
-    }
-    
-    .post-title {
-        max-width: 200px;
-    }
-    
-    .post-actions {
-        flex-direction: column;
-    }
-}
-</style>
-
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
     <!-- Sidebar Navigation -->
     <?php include __DIR__ . '/sidebar.php'; ?>
     
     <!-- Main Content -->
     <div class="lg:col-span-3">
-        <div class="bg-white rounded-2xl shadow-lg p-8">
-        <div class="posts-header">
-            <h2>Blog Yazıları Yönetimi</h2>
-            <a href="/blog/create" class="btn btn-primary">+ Yeni Yazı</a>
-        </div>
-        
-        <div class="posts-filters">
-            <div class="filter-group">
-                <label class="filter-label">Durum</label>
-                <select class="filter-control" id="status-filter">
-                    <option value="">Tüm Durumlar</option>
-                    <option value="published">Yayınlanan</option>
-                    <option value="draft">Taslak</option>
-                    <option value="archived">Arşivlenen</option>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">Yazar</label>
-                <select class="filter-control" id="author-filter">
-                    <option value="">Tüm Yazarlar</option>
-                    <!-- Yazarlar dinamik olarak yüklenecek -->
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">Kategori</label>
-                <select class="filter-control" id="category-filter">
-                    <option value="">Tüm Kategoriler</option>
-                    <!-- Kategoriler dinamik olarak yüklenecek -->
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label class="filter-label">Arama</label>
-                <input type="text" class="filter-control" id="search-filter" placeholder="Başlık veya içerik ara...">
+        <!-- Action Bar -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-list mr-2 text-blue-500"></i>
+                        Blog Yazıları
+                    </h2>
+                    <p class="text-gray-600 text-sm">Toplam <?= count($posts) ?> yazı</p>
+                </div>
+                <a href="/blog/create" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    Yeni Yazı Ekle
+                </a>
             </div>
         </div>
-        
+
+        <!-- Filters -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Durum</label>
+                    <select id="status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="published">Yayınlanan</option>
+                        <option value="draft">Taslak</option>
+                        <option value="archived">Arşivlenen</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Yazar</label>
+                    <select id="author-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tüm Yazarlar</option>
+                        <?php 
+                        $authors = [];
+                        foreach ($posts as $post) {
+                            if (!empty($post['author_name']) && !in_array($post['author_name'], $authors)) {
+                                $authors[] = $post['author_name'];
+                            }
+                        }
+                        foreach ($authors as $author): ?>
+                            <option value="<?= htmlspecialchars($author) ?>"><?= htmlspecialchars($author) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select id="category-filter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Tüm Kategoriler</option>
+                        <?php 
+                        $categories = [];
+                        foreach ($posts as $post) {
+                            if (!empty($post['category_names'])) {
+                                $postCategories = explode(', ', $post['category_names']);
+                                foreach ($postCategories as $cat) {
+                                    $cat = trim($cat);
+                                    if (!in_array($cat, $categories)) {
+                                        $categories[] = $cat;
+                                    }
+                                }
+                            }
+                        }
+                        sort($categories);
+                        foreach ($categories as $category): ?>
+                            <option value="<?= htmlspecialchars($category) ?>"><?= htmlspecialchars($category) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Arama</label>
+                    <input type="text" id="search-filter" placeholder="Başlık ara..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Grid -->
         <?php if (!empty($posts)): ?>
-            <div class="bulk-actions">
-                <input type="checkbox" class="bulk-checkbox" id="select-all"> 
-                <label for="select-all">Tümünü Seç</label>
-                <select id="bulk-action" class="filter-control" style="margin-left: auto;">
-                    <option value="">Toplu İşlem Seçin</option>
-                    <option value="publish">Yayınla</option>
-                    <option value="draft">Taslağa Al</option>
-                    <option value="archive">Arşivle</option>
-                    <option value="delete">Sil</option>
-                </select>
-                <button class="btn btn-warning" onclick="executeBulkAction()">Uygula</button>
-            </div>
-            
-            <table class="posts-table">
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="header-checkbox"></th>
-                        <th>Başlık</th>
-                        <th>Yazar</th>
-                        <th>Kategori</th>
-                        <th>Durum</th>
-                        <th>İstatistikler</th>
-                        <th>Tarih</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($posts as $post): ?>
-                        <tr data-post-id="<?= $post['id'] ?>">
-                            <td>
-                                <input type="checkbox" class="post-checkbox" value="<?= $post['id'] ?>">
-                            </td>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="posts-grid">
+                <?php foreach ($posts as $post): ?>
+                    <div class="post-card bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group" 
+                         data-status="<?= $post['status'] ?>"
+                         data-author="<?= htmlspecialchars($post['author_name'] ?? '') ?>"
+                         data-categories="<?= htmlspecialchars($post['category_names'] ?? '') ?>"
+                         data-title="<?= htmlspecialchars($post['title']) ?>">
+                        
+                        <!-- Card Header -->
+                        <div class="relative h-48 bg-gradient-to-r from-blue-500 to-indigo-600 overflow-hidden">
+                            <?php if (!empty($post['featured_image'])): ?>
+                                <img src="<?= htmlspecialchars($post['featured_image']) ?>" 
+                                     alt="<?= htmlspecialchars($post['title']) ?>"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            <?php else: ?>
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fas fa-image text-white text-4xl opacity-50"></i>
+                                </div>
+                            <?php endif; ?>
                             
-                            <td class="post-title">
-                                <a href="/blog/post/<?= htmlspecialchars($post['slug']) ?>" target="_blank">
+                            <!-- Status Badge -->
+                            <div class="absolute top-4 left-4">
+                                <?php 
+                                $statusConfig = [
+                                    'published' => ['bg' => 'bg-green-500', 'text' => 'Yayında', 'icon' => 'fa-check-circle'],
+                                    'draft' => ['bg' => 'bg-yellow-500', 'text' => 'Taslak', 'icon' => 'fa-edit'],
+                                    'archived' => ['bg' => 'bg-red-500', 'text' => 'Arşivli', 'icon' => 'fa-archive']
+                                ];
+                                $config = $statusConfig[$post['status']] ?? ['bg' => 'bg-gray-500', 'text' => ucfirst($post['status']), 'icon' => 'fa-question'];
+                                ?>
+                                <span class="<?= $config['bg'] ?> text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
+                                    <i class="fas <?= $config['icon'] ?> mr-1"></i>
+                                    <?= $config['text'] ?>
+                                </span>
+                            </div>
+                            
+                            <!-- View Count -->
+                            <div class="absolute top-4 right-4">
+                                <span class="bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                                    <i class="fas fa-eye mr-1"></i>
+                                    <?= number_format($post['views'] ?? 0) ?>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Card Content -->
+                        <div class="p-6">
+                            <!-- Title -->
+                            <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                <a href="/blog/post/<?= htmlspecialchars($post['slug']) ?>" target="_blank" class="hover:underline">
                                     <?= htmlspecialchars($post['title']) ?>
                                 </a>
-                                <?php if (!empty($post['excerpt'])): ?>
-                                    <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">
-                                        <?= htmlspecialchars(substr($post['excerpt'], 0, 100)) ?>...
-                                    </div>
-                                <?php endif; ?>
-                            </td>
+                            </h3>
                             
-                            <td>
-                                <div class="author-info">
-                                    <div class="author-avatar">
-                                        <?= strtoupper(substr($post['author_name'] ?? 'U', 0, 1)) ?>
-                                    </div>
-                                    <span><?= htmlspecialchars($post['author_name'] ?? 'Bilinmeyen') ?></span>
-                                </div>
-                            </td>
+                            <!-- Excerpt -->
+                            <?php if (!empty($post['excerpt'])): ?>
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                                    <?= htmlspecialchars($post['excerpt']) ?>
+                                </p>
+                            <?php endif; ?>
                             
-                            <td>
-                                <?php if (!empty($post['category_names'])): ?>
+                            <!-- Categories -->
+                            <?php if (!empty($post['category_names'])): ?>
+                                <div class="mb-4">
                                     <?php 
-                                    $categories = explode(', ', $post['category_names']);
-                                    $maxDisplay = 2;
-                                    $displayCategories = array_slice($categories, 0, $maxDisplay);
-                                    foreach ($displayCategories as $category): 
+                                    $categories = array_slice(explode(', ', $post['category_names']), 0, 3);
+                                    foreach ($categories as $category): 
                                     ?>
-                                        <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; margin-right: 0.25rem; display: inline-block; margin-bottom: 0.25rem;">
+                                        <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-medium mr-2 mb-1">
+                                            <i class="fas fa-tag mr-1"></i>
                                             <?= htmlspecialchars(trim($category)) ?>
                                         </span>
                                     <?php endforeach; ?>
-                                    <?php if (count($categories) > $maxDisplay): ?>
-                                        <span style="color: #666; font-size: 0.8rem; font-style: italic;" 
-                                              title="<?= htmlspecialchars(implode(', ', array_slice($categories, $maxDisplay))) ?>">
-                                            (+<?= count($categories) - $maxDisplay ?> daha)
+                                    <?php if (count(explode(', ', $post['category_names'])) > 3): ?>
+                                        <span class="text-xs text-gray-500">+<?= count(explode(', ', $post['category_names'])) - 3 ?> daha</span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Author & Date -->
+                            <div class="flex items-center justify-between mb-4 pt-4 border-t border-gray-200">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-white text-sm font-semibold">
+                                            <?= strtoupper(substr($post['author_name'] ?? 'U', 0, 1)) ?>
                                         </span>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <span style="color: #666; font-style: italic;">Kategorisiz</span>
-                                <?php endif; ?>
-                            </td>
-                            
-                            <td>
-                                <?php 
-                                $statusLabels = [
-                                    'published' => 'Yayınlandı',
-                                    'draft' => 'Taslak',
-                                    'archived' => 'Arşivlendi'
-                                ];
-                                $statusLabel = $statusLabels[$post['status']] ?? ucfirst($post['status']);
-                                ?>
-                                <span class="status-badge status-<?= $post['status'] ?>">
-                                    <?= $statusLabel ?>
-                                </span>
-                            </td>
-                            
-                            <td>
-                                <div class="post-stats">
-                                    <span>👁️ <?= number_format($post['views'] ?? 0) ?> görüntülenme</span>
-                                    <span>💬 <?= $post['comment_count'] ?? 0 ?> yorum</span>
-                                    <span>❤️ <?= $post['likes'] ?? 0 ?> beğeni</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900"><?= htmlspecialchars($post['author_name'] ?? 'Bilinmeyen') ?></p>
+                                        <p class="text-xs text-gray-500"><?= date('d.m.Y', strtotime($post['created_at'])) ?></p>
+                                    </div>
                                 </div>
-                            </td>
+                            </div>
                             
-                            <td>
-                                <div style="font-size: 0.8rem;">
-                                    <div><strong>Oluşturulma:</strong></div>
-                                    <div><?= date('d.m.Y H:i', strtotime($post['created_at'])) ?></div>
-                                    <?php if ($post['updated_at'] !== $post['created_at']): ?>
-                                        <div style="margin-top: 0.25rem;"><strong>Güncelleme:</strong></div>
-                                        <div><?= date('d.m.Y H:i', strtotime($post['updated_at'])) ?></div>
-                                    <?php endif; ?>
-                                </div>
-                            </td>
+                            <!-- Stats -->
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span><i class="fas fa-comment mr-1"></i><?= $post['comment_count'] ?? 0 ?></span>
+                                <span><i class="fas fa-heart mr-1"></i><?= $post['likes'] ?? 0 ?></span>
+                                <span><i class="fas fa-calendar mr-1"></i><?= date('d.m', strtotime($post['created_at'])) ?></span>
+                            </div>
                             
-                            <td>
-                                <div class="post-actions">
+                            <!-- Actions -->
+                            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                                <div class="flex space-x-2">
                                     <a href="/blog/post/<?= htmlspecialchars($post['slug']) ?>" 
-                                       class="btn btn-success" target="_blank" title="Görüntüle">
-                                        👁️
+                                       target="_blank"
+                                       class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                       title="Görüntüle">
+                                        <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="/blog/edit/<?= $post['id'] ?>" 
-                                       class="btn btn-warning" title="Düzenle">
-                                        ✏️
+                                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                       title="Düzenle">
+                                        <i class="fas fa-edit"></i>
                                     </a>
-                                    <form style="display: inline-block;" method="POST" action="/blog/delete/<?= $post['id'] ?>">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                                        <button type="submit" class="btn btn-danger" 
-                                                onclick="return confirm('Bu yazıyı silmek istediğinizden emin misiniz?')"
-                                                title="Sil">
-                                            🗑️
-                                        </button>
-                                    </form>
                                 </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                                
+                                <form method="POST" action="/blog/delete/<?= $post['id'] ?>" class="inline">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                    <button type="submit" 
+                                            onclick="return confirm('Bu yazıyı silmek istediğinizden emin misiniz?')"
+                                            class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                            title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         <?php else: ?>
-            <div class="no-posts">
-                <h4>Henüz blog yazısı yok</h4>
-                <p>İlk blog yazınızı oluşturmak için yukarıdaki "Yeni Yazı" butonunu kullanın.</p>
-                <a href="/blog/create" class="btn btn-primary" style="margin-top: 1rem;">İlk Yazımı Oluştur</a>
+            <!-- Empty State -->
+            <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-file-alt text-4xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Henüz blog yazısı yok</h3>
+                <p class="text-gray-600 mb-6">İlk blog yazınızı oluşturmak için aşağıdaki butona tıklayın.</p>
+                <a href="/blog/create" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center">
+                    <i class="fas fa-plus mr-2"></i>
+                    İlk Yazımı Oluştur
+                </a>
             </div>
         <?php endif; ?>
-        </div>
     </div>
 </div>
 
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.post-card {
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+}
+</style>
+
 <script>
-// Filtering functionality
 document.addEventListener('DOMContentLoaded', function() {
     const statusFilter = document.getElementById('status-filter');
     const authorFilter = document.getElementById('author-filter');
     const categoryFilter = document.getElementById('category-filter');
     const searchFilter = document.getElementById('search-filter');
-    const selectAll = document.getElementById('select-all');
-    const headerCheckbox = document.getElementById('header-checkbox');
     
-    // Apply filters
     function applyFilters() {
-        const rows = document.querySelectorAll('.posts-table tbody tr');
+        const cards = document.querySelectorAll('.post-card');
         const statusValue = statusFilter.value.toLowerCase();
         const authorValue = authorFilter.value.toLowerCase();
         const categoryValue = categoryFilter.value.toLowerCase();
         const searchValue = searchFilter.value.toLowerCase();
         
-        rows.forEach(row => {
-            const status = row.querySelector('.status-badge').textContent.toLowerCase().trim();
-            const author = row.querySelector('.author-info span').textContent.toLowerCase();
-            const category = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-            const title = row.querySelector('.post-title a').textContent.toLowerCase();
+        cards.forEach(card => {
+            const status = card.dataset.status.toLowerCase();
+            const author = card.dataset.author.toLowerCase();
+            const categories = card.dataset.categories.toLowerCase();
+            const title = card.dataset.title.toLowerCase();
             
-            const statusMatch = !statusValue || status.includes(statusValue);
+            const statusMatch = !statusValue || status === statusValue;
             const authorMatch = !authorValue || author.includes(authorValue);
-            const categoryMatch = !categoryValue || category.includes(categoryValue);
+            const categoryMatch = !categoryValue || categories.includes(categoryValue);
             const searchMatch = !searchValue || title.includes(searchValue);
             
             if (statusMatch && authorMatch && categoryMatch && searchMatch) {
-                row.style.display = '';
+                card.style.display = '';
             } else {
-                row.style.display = 'none';
+                card.style.display = 'none';
             }
         });
     }
     
-    // Attach filter events
     [statusFilter, authorFilter, categoryFilter, searchFilter].forEach(filter => {
         filter.addEventListener('change', applyFilters);
         filter.addEventListener('input', applyFilters);
     });
-    
-    // Select all functionality
-    if (selectAll) {
-        selectAll.addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.post-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-    }
-    
-    if (headerCheckbox) {
-        headerCheckbox.addEventListener('change', function() {
-            const checkboxes = document.querySelectorAll('.post-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-    }
 });
-
-// Bulk actions
-function executeBulkAction() {
-    const selectedPosts = Array.from(document.querySelectorAll('.post-checkbox:checked')).map(cb => cb.value);
-    const action = document.getElementById('bulk-action').value;
-    
-    if (selectedPosts.length === 0) {
-        alert('Lütfen en az bir yazı seçin.');
-        return;
-    }
-    
-    if (!action) {
-        alert('Lütfen bir işlem seçin.');
-        return;
-    }
-    
-    const actionNames = {
-        'publish': 'yayınla',
-        'draft': 'taslağa al',
-        'archive': 'arşivle',
-        'delete': 'sil'
-    };
-    
-    if (confirm(`Seçili ${selectedPosts.length} yazıyı ${actionNames[action]}mak istediğinizden emin misiniz?`)) {
-        // AJAX request to perform bulk action
-        fetch('/admin/posts/bulk-action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                posts: selectedPosts,
-                action: action,
-                csrf_token: window.csrfToken
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Hata: ' + data.message);
-            }
-        })
-        .catch(error => {
-            alert('Bir hata oluştu: ' + error.message);
-        });
-    }
-}
 </script>

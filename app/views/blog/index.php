@@ -12,11 +12,11 @@
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
             <a href="#latest-posts" class="bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
-                <i class="fas fa-arrow-down mr-2"></i>Son Yazılar
+                <i class="fas fa-arrow-down mr-2"></i><span class="editable-content" data-content-key="latest_posts_button"><?= $contentService->getContent('latest_posts_button', 'Son Yazılar') ?></span>
             </a>
             <?php if ($is_logged_in && $user && ($user['role'] === 'admin' || $user['role'] === 'writer')): ?>
                 <a href="/blog/create" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:scale-105">
-                    <i class="fas fa-plus mr-2"></i>Yeni Yazı Yaz
+                    <i class="fas fa-plus mr-2"></i><span class="editable-content" data-content-key="new_post_button"><?= $contentService->getContent('new_post_button', 'Yeni Yazı Yaz') ?></span>
                 </a>
             <?php endif; ?>
         </div>
@@ -40,19 +40,7 @@
                     </span>
                 </h2>
                 
-                <!-- Filter Buttons -->
-                <div class="flex space-x-2">
-                    <button class="filter-btn active bg-primary-500 text-white px-4 py-2 rounded-lg transition-colors" data-filter="all">
-                        Tümü
-                    </button>
-                    <?php if (!empty($categories)): ?>
-                        <?php foreach (array_slice($categories, 0, 4) as $category): ?>
-                            <button class="filter-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition-colors" data-filter="<?= htmlspecialchars($category['slug']) ?>">
-                                <?= htmlspecialchars($category['name']) ?>
-                            </button>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+
             </div>
             
             <!-- Posts Grid -->

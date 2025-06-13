@@ -263,6 +263,38 @@ class BlogService
     }
 
     /**
+     * Kategori sil
+     */
+    public function deleteCategory($id)
+    {
+        $category = $this->categoryModel->findById($id);
+        
+        if (!$category) {
+            return ['success' => false, 'message' => 'Kategori bulunamadı.'];
+        }
+
+        // Bu kategoriye ait yazı var mı kontrol et
+        $postCount = $this->postModel->query(
+            "SELECT COUNT(*) as count FROM blog_post_categories WHERE category_id = ?",
+            [$id]
+        );
+        
+        if (($postCount[0]['count'] ?? 0) > 0) {
+            // Kategoriye ait yazıları genel kategoriye taşı (id: 1 olduğunu varsayıyoruz)
+            $this->postModel->query(
+                "UPDATE blog_post_categories SET category_id = 1 WHERE category_id = ?",
+                [$id]
+            );
+        }
+
+        if ($this->categoryModel->delete($id)) {
+            return ['success' => true, 'message' => 'Kategori başarıyla silindi!'];
+        }
+
+        return ['success' => false, 'message' => 'Kategori silinirken bir hata oluştu.'];
+    }
+
+    /**
      * Post validation
      */
     private function validatePostData($data, $excludeId = null)

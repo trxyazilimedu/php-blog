@@ -57,6 +57,9 @@ class HomeController extends BaseController
     {
         $contentService = $this->service('content');
         
+        // Default content oluştur
+        $this->createDefaultContactContent($contentService);
+        
         if ($this->isPost()) {
             $contactData = [
                 'name' => $this->input('name', ''),
@@ -114,5 +117,26 @@ class HomeController extends BaseController
         $this->view('home/contact', $data);
     }
 
+    /**
+     * Default contact page content oluştur
+     */
+    private function createDefaultContactContent($contentService)
+    {
+        $defaults = [
+            'contact_hero_title' => 'İletişim',
+            'contact_hero_subtitle' => 'Bizimle iletişime geçmek için aşağıdaki formu kullanabilirsiniz. Size en kısa sürede dönüş yapacağız.',
+            'contact_email' => 'info@simpleframework.com',
+            'contact_phone' => '+90 (555) 123 45 67',
+            'contact_address' => 'İstanbul, Türkiye',
+            'contact_hours' => 'Pzt-Cum 09:00-18:00'
+        ];
+        
+        foreach ($defaults as $key => $value) {
+            $existing = $contentService->getContent($key);
+            if (empty($existing)) {
+                $contentService->updateContent($key, $value, 'contact', 'main');
+            }
+        }
+    }
 
 }
