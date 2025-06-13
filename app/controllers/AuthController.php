@@ -116,8 +116,22 @@ class AuthController extends BaseController
             $result = $this->userManagementService->registerUser($userData);
 
             if ($result['success']) {
-                $this->flash('success', $result['message']);
-                $this->redirect('/login');
+                // Auto-login after successful registration
+                $loginResult = $this->authService->login($userData['email'], $userData['password']);
+                
+                if ($loginResult['success']) {
+                    $this->flash('success', 'Kayıt başarılı! Hoş geldiniz.');
+                    
+                    // Admin ise admin paneline, değilse blog ana sayfasına yönlendir
+                    if ($loginResult['user']['role'] === 'admin') {
+                        $this->redirect('/admin');
+                    } else {
+                        $this->redirect('/blog');
+                    }
+                } else {
+                    $this->flash('success', $result['message']);
+                    $this->redirect('/login');
+                }
             } else {
                 $this->flash('error', $result['message']);
                 $this->redirect('/auth/register');

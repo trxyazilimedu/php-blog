@@ -32,34 +32,7 @@ $siteDescription = $settingsService->getSiteDescription();
     <?php endif; ?>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '#f0f9ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a'
-                        },
-                        secondary: {
-                            500: '#6366f1',
-                            600: '#4f46e5'
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-down': 'slideDown 0.3s ease-out',
-                        'bounce-gentle': 'bounce 1s infinite'
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="/assets/css/style.css">
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -649,21 +622,6 @@ $siteDescription = $settingsService->getSiteDescription();
         <?= $additional_js ?>
     <?php endif; ?>
     
-    <!-- Alert Styles -->
-    <style>
-        .alert-success {
-            @apply bg-green-50 border-green-200 text-green-800;
-        }
-        .alert-danger {
-            @apply bg-red-50 border-red-200 text-red-800;
-        }
-        .alert-warning {
-            @apply bg-yellow-50 border-yellow-200 text-yellow-800;
-        }
-        .alert-info {
-            @apply bg-blue-50 border-blue-200 text-blue-800;
-        }
-    </style>
     
     <!-- Scripts -->
     <script>

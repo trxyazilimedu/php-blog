@@ -1,0 +1,26 @@
+{
+  "name": "simple-framework",
+  "version": "1.0.0",
+  "description": "Modern ve güçlü bir PHP framework örneği. BaseController, Service katmanı ve gelişmiş özelliklerle donatılmış MVC mimarisi.",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "npx tailwindcss -i ./src/input.css -o ./public/assets/css/style.css",
+    "watch-css": "npx tailwindcss -i ./src/input.css -o ./public/assets/css/style.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trxyazilimedu/php-blog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/trxyazilimedu/php-blog/issues"
+  },
+  "homepage": "https://github.com/trxyazilimedu/php-blog#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
