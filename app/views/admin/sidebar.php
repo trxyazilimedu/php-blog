@@ -29,6 +29,12 @@ $adminMenuItems = [
         'active_pattern' => '/^\/admin\/categories/'
     ],
     [
+        'url' => '/admin/contacts',
+        'title' => 'İletişim Mesajları',
+        'icon' => 'fas fa-envelope',
+        'active_pattern' => '/^\/admin\/contacts/'
+    ],
+    [
         'url' => '/admin/settings',
         'title' => 'Ayarlar',
         'icon' => 'fas fa-cog',

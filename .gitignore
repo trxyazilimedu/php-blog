@@ -1,0 +1,29 @@
+# Vendor directory
+vendor/
+
+# Composer lock file (optional - usually committed but excluding based on current status)
+composer.lock
+
+# Storage files
+storage/cache/
+storage/logs/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.production

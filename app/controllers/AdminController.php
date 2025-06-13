@@ -823,4 +823,214 @@ class AdminController extends BaseController
             $this->json(['success' => false, 'message' => 'Silme başarısız']);
         }
     }
+
+    /**
+     * İletişim mesajları listesi
+     */
+    public function contacts()
+    {
+        $this->requireAdmin();
+
+        $contactModel = $this->model('Contact');
+        
+        // Sayfalama parametreleri
+        $currentPage = max(1, (int)$this->input('page', 1));
+        $perPage = max(20, min(100, (int)$this->input('per_page', 20)));
+        $currentStatus = $this->input('status', '');
+        
+        // Offset hesapla
+        $offset = ($currentPage - 1) * $perPage;
+        
+        // Mesajları getir
+        $messages = $contactModel->getAllMessages($perPage, $offset, $currentStatus ?: null);
+        $totalMessages = $contactModel->getMessagesCount($currentStatus ?: null);
+        $totalPages = ceil($totalMessages / $perPage);
+        
+        // İstatistikler
+        $stats = $contactModel->getStatusStats();
+        
+        $data = [
+            'page_title' => 'İletişim Mesajları',
+            'messages' => $messages,
+            'stats' => $stats,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
+            'totalMessages' => $totalMessages,
+            'perPage' => $perPage,
+            'currentStatus' => $currentStatus
+        ];
+
+        $this->view('admin/contacts', $data);
+    }
+
+    /**
+     * Zaman farkını hesapla (helper metod)
+     */
+    public function timeAgo($datetime)
+    {
+        $time = time() - strtotime($datetime);
+
+        if ($time < 60) return 'Az önce';
+        if ($time < 3600) return floor($time/60) . ' dakika önce';
+        if ($time < 86400) return floor($time/3600) . ' saat önce';
+        if ($time < 2592000) return floor($time/86400) . ' gün önce';
+        if ($time < 31536000) return floor($time/2592000) . ' ay önce';
+        return floor($time/31536000) . ' yıl önce';
+    }
+
+    /**
+     * Mesaj detayını görüntüle
+     */
+    public function viewContact($id)
+    {
+        $this->requireAdmin();
+
+        $contactModel = $this->model('Contact');
+        $message = $contactModel->getMessageById($id);
+
+        if (!$message) {
+            $this->json(['success' => false, 'message' => 'Mesaj bulunamadı']);
+            return;
+        }
+
+        // Mesajı okundu olarak işaretle
+        if ($message['status'] === 'new') {
+            $contactModel->updateStatus($id, 'read');
+            $message['status'] = 'read';
+        }
+
+        $this->json(['success' => true, 'message' => $message]);
+    }
+
+    /**
+     * Mesaj durumunu güncelle
+     */
+    public function updateContactStatus($id)
+    {
+        $this->requireAdmin();
+
+        // JSON request için input'u farklı al
+        $input = json_decode(file_get_contents('php://input'), true) ?: [];
+        $csrfToken = $input['csrf_token'] ?? $this->input('csrf_token');
+
+        if (!$this->validateCSRFToken($csrfToken)) {
+            error_log("CSRF Token validation failed. Session: " . ($_SESSION['csrf_token'] ?? 'null') . " Input: " . ($csrfToken ?? 'null'));
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası - CSRF token geçersiz']);
+            return;
+        }
+
+        $status = $input['status'] ?? $this->input('status');
+        if (!in_array($status, ['new', 'read', 'replied'])) {
+            $this->json(['success' => false, 'message' => 'Geçersiz durum']);
+            return;
+        }
+
+        $contactModel = $this->model('Contact');
+        $result = $contactModel->updateStatus($id, $status);
+
+        if ($result) {
+            $this->json(['success' => true, 'message' => 'Durum güncellendi']);
+        } else {
+            $this->json(['success' => false, 'message' => 'Güncelleme başarısız']);
+        }
+    }
+
+    /**
+     * Mesaj sil
+     */
+    public function deleteContact($id)
+    {
+        $this->requireAdmin();
+
+        // JSON request için input'u farklı al
+        $input = json_decode(file_get_contents('php://input'), true) ?: [];
+        $csrfToken = $input['csrf_token'] ?? $this->input('csrf_token');
+
+        if (!$this->validateCSRFToken($csrfToken)) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
+            return;
+        }
+
+        $contactModel = $this->model('Contact');
+        $result = $contactModel->deleteMessage($id);
+
+        if ($result) {
+            $this->json(['success' => true, 'message' => 'Mesaj silindi']);
+        } else {
+            $this->json(['success' => false, 'message' => 'Silme başarısız']);
+        }
+    }
+
+    /**
+     * Toplu durum güncelleme
+     */
+    public function bulkUpdateContacts()
+    {
+        $this->requireAdmin();
+
+        // JSON request için input'u farklı al
+        $input = json_decode(file_get_contents('php://input'), true) ?: [];
+        $csrfToken = $input['csrf_token'] ?? $this->input('csrf_token');
+
+        if (!$this->validateCSRFToken($csrfToken)) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
+            return;
+        }
+
+        $ids = $input['ids'] ?? $this->input('ids', []);
+        $status = $input['status'] ?? $this->input('status');
+
+        if (empty($ids) || !in_array($status, ['new', 'read', 'replied'])) {
+            $this->json(['success' => false, 'message' => 'Geçersiz parametreler']);
+            return;
+        }
+
+        $contactModel = $this->model('Contact');
+        $result = $contactModel->bulkUpdateStatus($ids, $status);
+
+        if ($result) {
+            $this->json(['success' => true, 'message' => 'Mesajlar güncellendi']);
+        } else {
+            $this->json(['success' => false, 'message' => 'Güncelleme başarısız']);
+        }
+    }
+
+    /**
+     * Toplu mesaj silme
+     */
+    public function bulkDeleteContacts()
+    {
+        $this->requireAdmin();
+
+        // JSON request için input'u farklı al
+        $input = json_decode(file_get_contents('php://input'), true) ?: [];
+        $csrfToken = $input['csrf_token'] ?? $this->input('csrf_token');
+
+        if (!$this->validateCSRFToken($csrfToken)) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
+            return;
+        }
+
+        $ids = $input['ids'] ?? $this->input('ids', []);
+
+        if (empty($ids)) {
+            $this->json(['success' => false, 'message' => 'Silinecek mesaj seçilmemiş']);
+            return;
+        }
+
+        $contactModel = $this->model('Contact');
+        $successCount = 0;
+
+        foreach ($ids as $id) {
+            if ($contactModel->deleteMessage($id)) {
+                $successCount++;
+            }
+        }
+
+        if ($successCount > 0) {
+            $this->json(['success' => true, 'message' => "$successCount mesaj silindi"]);
+        } else {
+            $this->json(['success' => false, 'message' => 'Hiçbir mesaj silinemedi']);
+        }
+    }
 }

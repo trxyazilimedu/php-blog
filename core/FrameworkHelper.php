@@ -229,7 +229,13 @@ class FrameworkHelper
     public static function validateCSRFToken($token)
     {
         $sessionToken = $_SESSION['csrf_token'] ?? '';
-        return hash_equals($sessionToken, $token);
+        
+        // Null veya empty string kontrolü
+        if (empty($sessionToken) || empty($token)) {
+            return false;
+        }
+        
+        return hash_equals($sessionToken, (string)$token);
     }
 
     /**

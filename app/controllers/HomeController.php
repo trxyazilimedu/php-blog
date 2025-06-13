@@ -64,6 +64,7 @@ class HomeController extends BaseController
             $contactData = [
                 'name' => $this->input('name', ''),
                 'email' => $this->input('email', ''),
+                'subject' => $this->input('subject', ''),
                 'message' => $this->input('message', '')
             ];
             

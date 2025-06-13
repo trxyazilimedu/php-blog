@@ -52,9 +52,9 @@
     <!-- Features Grid -->
     <div class="mb-16">
         <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Neler Sunuyoruz?</h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                Teknoloji dünyasında güvenilir bilgi kaynağınız
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 editable-content" data-content-key="about_services_title"><?= $contentService->getContent('about_services_title', 'Neler Sunuyoruz?') ?></h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto editable-content" data-content-key="about_services_subtitle">
+                <?= $contentService->getContent('about_services_subtitle', 'Teknoloji dünyasında güvenilir bilgi kaynağınız') ?>
             </p>
         </div>
         
@@ -63,9 +63,9 @@
                 <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-code text-purple-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Yazılım Geliştirme</h3>
-                <p class="text-gray-600 text-sm">
-                    Modern programlama dilleri ve framework'ler hakkında detaylı rehberler ve ipuçları.
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 editable-content" data-content-key="about_service1_title"><?= $contentService->getContent('about_service1_title', 'Yazılım Geliştirme') ?></h3>
+                <p class="text-gray-600 text-sm editable-content" data-content-key="about_service1_desc">
+                    <?= $contentService->getContent('about_service1_desc', 'Modern programlama dilleri ve framework\'ler hakkında detaylı rehberler ve ipuçları.') ?>
                 </p>
             </div>
             
@@ -73,9 +73,9 @@
                 <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-mobile-alt text-indigo-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Mobil Teknolojiler</h3>
-                <p class="text-gray-600 text-sm">
-                    iOS, Android ve cross-platform geliştirme konularında güncel içerikler.
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 editable-content" data-content-key="about_service2_title"><?= $contentService->getContent('about_service2_title', 'Mobil Teknolojiler') ?></h3>
+                <p class="text-gray-600 text-sm editable-content" data-content-key="about_service2_desc">
+                    <?= $contentService->getContent('about_service2_desc', 'iOS, Android ve cross-platform geliştirme konularında güncel içerikler.') ?>
                 </p>
             </div>
             
@@ -83,9 +83,9 @@
                 <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-cloud text-pink-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Bulut Teknolojileri</h3>
-                <p class="text-gray-600 text-sm">
-                    AWS, Azure, Google Cloud ve DevOps pratikleri hakkında kapsamlı yazılar.
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 editable-content" data-content-key="about_service3_title"><?= $contentService->getContent('about_service3_title', 'Bulut Teknolojileri') ?></h3>
+                <p class="text-gray-600 text-sm editable-content" data-content-key="about_service3_desc">
+                    <?= $contentService->getContent('about_service3_desc', 'AWS, Azure, Google Cloud ve DevOps pratikleri hakkında kapsamlı yazılar.') ?>
                 </p>
             </div>
             
@@ -93,9 +93,9 @@
                 <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-brain text-yellow-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Yapay Zeka</h3>
-                <p class="text-gray-600 text-sm">
-                    Machine Learning, Deep Learning ve AI uygulamaları üzerine araştırmalar.
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 editable-content" data-content-key="about_service4_title"><?= $contentService->getContent('about_service4_title', 'Yapay Zeka') ?></h3>
+                <p class="text-gray-600 text-sm editable-content" data-content-key="about_service4_desc">
+                    <?= $contentService->getContent('about_service4_desc', 'Machine Learning, Deep Learning ve AI uygulamaları üzerine araştırmalar.') ?>
                 </p>
             </div>
             
@@ -103,9 +103,9 @@
                 <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-shield-alt text-red-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Siber Güvenlik</h3>
-                <p class="text-gray-600 text-sm">
-                    Web güvenliği, penetration testing ve güvenli kodlama teknikleri.
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 editable-content" data-content-key="about_service5_title"><?= $contentService->getContent('about_service5_title', 'Siber Güvenlik') ?></h3>
+                <p class="text-gray-600 text-sm editable-content" data-content-key="about_service5_desc">
+                    <?= $contentService->getContent('about_service5_desc', 'Web güvenliği, penetration testing ve güvenli kodlama teknikleri.') ?>
                 </p>
             </div>
             
@@ -113,9 +113,9 @@
                 <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fas fa-chart-line text-teal-600 text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Veri Analizi</h3>
-                <p class="text-gray-600 text-sm">
-                    Big Data, veri görselleştirme ve business intelligence konuları.
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 editable-content" data-content-key="about_service6_title"><?= $contentService->getContent('about_service6_title', 'Veri Analizi') ?></h3>
+                <p class="text-gray-600 text-sm editable-content" data-content-key="about_service6_desc">
+                    <?= $contentService->getContent('about_service6_desc', 'Big Data, veri görselleştirme ve business intelligence konuları.') ?>
                 </p>
             </div>
         </div>
@@ -124,26 +124,26 @@
     <!-- Stats -->
     <div class="bg-gray-50 rounded-3xl p-8 md:p-12 mb-16">
         <div class="text-center mb-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Sayılarla Platformumuz</h2>
-            <p class="text-lg text-gray-600">Büyüyen topluluğumuzun bir parçası olun</p>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4 editable-content" data-content-key="about_stats_title"><?= $contentService->getContent('about_stats_title', 'Sayılarla Platformumuz') ?></h2>
+            <p class="text-lg text-gray-600 editable-content" data-content-key="about_stats_subtitle"><?= $contentService->getContent('about_stats_subtitle', 'Büyüyen topluluğumuzun bir parçası olun') ?></p>
         </div>
         
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
             <div class="text-center">
-                <div class="text-4xl font-bold text-primary-600 mb-2">50+</div>
-                <div class="text-gray-600">Teknoloji Yazısı</div>
+                <div class="text-4xl font-bold text-primary-600 mb-2 editable-content" data-content-key="about_stat1_number"><?= $contentService->getContent('about_stat1_number', '50+') ?></div>
+                <div class="text-gray-600 editable-content" data-content-key="about_stat1_label"><?= $contentService->getContent('about_stat1_label', 'Teknoloji Yazısı') ?></div>
             </div>
             <div class="text-center">
-                <div class="text-4xl font-bold text-secondary-600 mb-2">1000+</div>
-                <div class="text-gray-600">Aktif Okuyucu</div>
+                <div class="text-4xl font-bold text-secondary-600 mb-2 editable-content" data-content-key="about_stat2_number"><?= $contentService->getContent('about_stat2_number', '1000+') ?></div>
+                <div class="text-gray-600 editable-content" data-content-key="about_stat2_label"><?= $contentService->getContent('about_stat2_label', 'Aktif Okuyucu') ?></div>
             </div>
             <div class="text-center">
-                <div class="text-4xl font-bold text-green-600 mb-2">15+</div>
-                <div class="text-gray-600">Kategori</div>
+                <div class="text-4xl font-bold text-green-600 mb-2 editable-content" data-content-key="about_stat3_number"><?= $contentService->getContent('about_stat3_number', '15+') ?></div>
+                <div class="text-gray-600 editable-content" data-content-key="about_stat3_label"><?= $contentService->getContent('about_stat3_label', 'Kategori') ?></div>
             </div>
             <div class="text-center">
-                <div class="text-4xl font-bold text-orange-600 mb-2">2024</div>
-                <div class="text-gray-600">Kuruluş</div>
+                <div class="text-4xl font-bold text-orange-600 mb-2 editable-content" data-content-key="about_stat4_number"><?= $contentService->getContent('about_stat4_number', '2024') ?></div>
+                <div class="text-gray-600 editable-content" data-content-key="about_stat4_label"><?= $contentService->getContent('about_stat4_label', 'Kuruluş') ?></div>
             </div>
         </div>
     </div>
@@ -151,9 +151,9 @@
     <!-- Call to Action -->
     <div class="text-center">
         <div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl mx-auto">
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Topluluğumuza Katılın</h3>
-            <p class="text-gray-600 mb-6">
-                Teknoloji dünyasındaki son gelişmeleri kaçırmayın. Blog yazılarımızı takip edin ve bilgi birikimlerinizi artırın.
+            <h3 class="text-2xl font-bold text-gray-900 mb-4 editable-content" data-content-key="about_cta_title"><?= $contentService->getContent('about_cta_title', 'Topluluğumuza Katılın') ?></h3>
+            <p class="text-gray-600 mb-6 editable-content" data-content-key="about_cta_description">
+                <?= $contentService->getContent('about_cta_description', 'Teknoloji dünyasındaki son gelişmeleri kaçırmayın. Blog yazılarımızı takip edin ve bilgi birikimlerinizi artırın.') ?>
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="/blog" 

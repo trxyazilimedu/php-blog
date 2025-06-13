@@ -90,6 +90,14 @@ Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
     Router::post('/navigation/update', 'Admin@updateNavigation');
     Router::post('/navigation/create', 'Admin@createNavigation');
     Router::post('/navigation/delete/{id}', 'Admin@deleteNavigation');
+    
+    // Contact management
+    Router::get('/contacts', 'Admin@contacts');
+    Router::get('/contacts/view/{id}', 'Admin@viewContact');
+    Router::post('/contacts/update-status/{id}', 'Admin@updateContactStatus');
+    Router::post('/contacts/delete/{id}', 'Admin@deleteContact');
+    Router::post('/contacts/bulk-update', 'Admin@bulkUpdateContacts');
+    Router::post('/contacts/bulk-delete', 'Admin@bulkDeleteContacts');
 });
 
 // ===========================================
