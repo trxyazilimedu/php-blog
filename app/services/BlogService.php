@@ -5,12 +5,14 @@ class BlogService
     private $postModel;
     private $categoryModel;
     private $userModel;
+    private $cacheService;
 
     public function __construct()
     {
         $this->postModel = new BlogPost();
         $this->categoryModel = new BlogCategory();
         $this->userModel = new User();
+        $this->cacheService = new CacheService();
     }
 
     /**
@@ -87,7 +89,20 @@ class BlogService
      */
     public function getPopularPosts($limit = 5)
     {
-        return $this->postModel->getPopularPosts($limit);
+        $cacheKey = "popular_posts_{$limit}";
+        
+        // Cache'den veri çek
+        $cachedData = $this->cacheService->getFileCache($cacheKey);
+        if ($cachedData !== null) {
+            return $cachedData;
+        }
+        
+        $posts = $this->postModel->getPopularPosts($limit);
+        
+        // Cache'le (1 saat)
+        $this->cacheService->setFileCache($cacheKey, $posts, 3600);
+        
+        return $posts;
     }
 
     /**
@@ -95,7 +110,20 @@ class BlogService
      */
     public function getRecentPosts($limit = 5)
     {
-        return $this->postModel->getRecentPosts($limit);
+        $cacheKey = "recent_posts_{$limit}";
+        
+        // Cache'den veri çek
+        $cachedData = $this->cacheService->getFileCache($cacheKey);
+        if ($cachedData !== null) {
+            return $cachedData;
+        }
+        
+        $posts = $this->postModel->getRecentPosts($limit);
+        
+        // Cache'le (30 dakika)
+        $this->cacheService->setFileCache($cacheKey, $posts, 1800);
+        
+        return $posts;
     }
 
     /**
@@ -103,7 +131,20 @@ class BlogService
      */
     public function getCategoriesWithPostCount()
     {
-        return $this->categoryModel->getAllWithPostCounts();
+        $cacheKey = "categories_with_post_count";
+        
+        // Cache'den veri çek
+        $cachedData = $this->cacheService->getFileCache($cacheKey);
+        if ($cachedData !== null) {
+            return $cachedData;
+        }
+        
+        $categories = $this->categoryModel->getAllWithPostCounts();
+        
+        // Cache'le (2 saat)
+        $this->cacheService->setFileCache($cacheKey, $categories, 7200);
+        
+        return $categories;
     }
 
     /**

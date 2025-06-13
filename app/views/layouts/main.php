@@ -331,7 +331,7 @@ $siteDescription = $settingsService->getSiteDescription();
                         <div class="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i class="fas fa-code text-white text-sm lg:text-base"></i>
                         </div>
-                        <h1 class="text-lg lg:text-xl font-bold gradient-text dark:text-white hidden sm:block editable-content" data-content-key="site_name">
+                        <h1 class="text-base md:text-lg lg:text-xl font-bold gradient-text dark:text-white editable-content" data-content-key="site_name">
                             <?= htmlspecialchars($siteTitle) ?>
                         </h1>
                     </a>

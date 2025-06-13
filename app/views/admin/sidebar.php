@@ -33,6 +33,12 @@ $adminMenuItems = [
         'title' => 'Ayarlar',
         'icon' => 'fas fa-cog',
         'active_pattern' => '/^\/admin\/settings/'
+    ],
+    [
+        'url' => '/admin/cache-management',
+        'title' => 'Cache Yönetimi',
+        'icon' => 'fas fa-tachometer-alt',
+        'active_pattern' => '/^\/admin\/cache-management/'
     ]
 ];
 

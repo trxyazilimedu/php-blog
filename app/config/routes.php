@@ -77,6 +77,8 @@ Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
     Router::get('/settings', 'Admin@settings');
     Router::post('/settings', 'Admin@settings');
     Router::post('/test-smtp', 'Admin@testSmtp');
+    Router::get('/cache-management', 'Admin@cacheManagement');
+    Router::post('/cache-management', 'Admin@cacheManagement');
     
     // AJAX endpoints
     Router::post('/toggle-edit-mode', 'Admin@toggleEditMode');

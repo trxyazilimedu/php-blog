@@ -1,5 +1,5 @@
 <!-- Hero Section -->
-<section class="relative bg-gradient-to-r from-primary-600 via-secondary-500 to-primary-700 text-white py-20 mb-16 rounded-3xl overflow-hidden">
+<section class="relative bg-gradient-to-r from-primary-600 via-secondary-500 to-primary-700 text-white py-20 px-10 mb-16 rounded-3xl overflow-hidden">
     <div class="absolute inset-0 bg-black/20"></div>
     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
     

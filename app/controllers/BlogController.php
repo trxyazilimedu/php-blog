@@ -4,12 +4,14 @@ class BlogController extends BaseController
 {
     private $blogService;
     private $contentService;
+    private $cacheService;
 
     public function __construct()
     {
         parent::__construct();
         $this->blogService = $this->service('blog');
         $this->contentService = $this->service('content');
+        $this->cacheService = new CacheService();
     }
 
     /**
@@ -18,6 +20,15 @@ class BlogController extends BaseController
     public function index()
     {
         $page = $_GET['page'] ?? 1;
+        $cacheKey = "blog_index_page_{$page}";
+        
+        // Cache'den veri çekmeyi dene
+        $cachedData = $this->cacheService->getFileCache($cacheKey);
+        if ($cachedData !== null) {
+            $this->view('blog/index', $cachedData);
+            return;
+        }
+        
         $posts = $this->blogService->getHomePosts($page, 6);
         
         // Default içerikleri oluştur (eğer yoksa)
@@ -29,11 +40,13 @@ class BlogController extends BaseController
             'popular_posts' => $this->blogService->getPopularPosts(5),
             'recent_posts' => $this->blogService->getRecentPosts(5),
             'categories' => $this->blogService->getCategoriesWithPostCount(),
-            'contentService' => $this->contentService,
             'current_page' => $page,
             'navigation' => $this->getNavigation()
         ];
 
+        // Veriyi cache'le (30 dakika)
+        $this->cacheService->setFileCache($cacheKey, $data, 1800);
+        
         $this->view('blog/index', $data);
     }
 
@@ -42,12 +55,23 @@ class BlogController extends BaseController
      */
     public function show($slug)
     {
-        $post = $this->blogService->getPostDetail($slug);
+        $cacheKey = "blog_post_{$slug}";
         
-        if (!$post) {
-            $this->flash('error', 'Gönderi bulunamadı!');
-            $this->redirect('/blog');
-            return;
+        // Cache'den post verisini çek
+        $cachedPost = $this->cacheService->getFileCache($cacheKey);
+        if ($cachedPost === null) {
+            $post = $this->blogService->getPostDetail($slug);
+            
+            if (!$post) {
+                $this->flash('error', 'Gönderi bulunamadı!');
+                $this->redirect('/blog');
+                return;
+            }
+            
+            // Post'u cache'le (1 saat)
+            $this->cacheService->setFileCache($cacheKey, $post, 3600);
+        } else {
+            $post = $cachedPost;
         }
 
         // Check if user can moderate comments (writer/admin)
@@ -181,6 +205,9 @@ class BlogController extends BaseController
             $result = $this->blogService->createPost($postData, $currentUser['id']);
             
             if ($result['success']) {
+                // Blog post oluşturulduktan sonra cache'i temizle
+                $this->cacheService->smartClearCache('blog_post');
+                
                 $this->flash('success', $result['message']);
                 $this->redirect('/blog/my-posts');
             } else {
@@ -263,6 +290,9 @@ class BlogController extends BaseController
             $result = $this->blogService->updatePost($id, $postData, $currentUser['id'], $isAdmin);
             
             if ($result['success']) {
+                // Blog post güncellendiğinde cache'i temizle
+                $this->cacheService->smartClearCache('blog_post');
+                
                 $this->flash('success', $result['message']);
                 $this->redirect('/blog/post/' . $post['slug']);
             } else {
@@ -571,6 +601,9 @@ class BlogController extends BaseController
             $result = $commentModel->update($commentId, ['status' => 'approved']);
             
             if ($result) {
+                // Yorum onaylandığında cache'i temizle
+                $this->cacheService->smartClearCache('blog_comment');
+                
                 $this->flash('success', 'Yorum başarıyla onaylandı.');
             } else {
                 $this->flash('error', 'Yorum onaylanırken bir hata oluştu.');

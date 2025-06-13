@@ -6,6 +6,7 @@ class AdminController extends BaseController
     private $blogService;
     private $contentService;
     private $navigationService;
+    private $cacheService;
 
     public function __construct()
     {
@@ -14,6 +15,7 @@ class AdminController extends BaseController
         $this->blogService = $this->service('blog');
         $this->contentService = $this->service('content');
         $this->navigationService = $this->service('navigation');
+        $this->cacheService = new CacheService();
     }
 
     /**
@@ -580,6 +582,9 @@ class AdminController extends BaseController
             ];
 
             if ($settingsService->updateSettings($settings)) {
+                // Site ayarları güncellendiğinde cache'i temizle
+                $this->cacheService->smartClearCache('site_settings');
+                
                 $this->flash('success', 'Site ayarları başarıyla güncellendi!');
             } else {
                 $this->flash('error', 'Ayarlar güncellenirken bir hata oluştu!');
@@ -598,6 +603,61 @@ class AdminController extends BaseController
         ], $allSettings);
 
         $this->view('admin/settings', $data);
+    }
+
+    /**
+     * Cache yönetimi
+     */
+    public function cacheManagement()
+    {
+        $this->requireAdmin();
+
+        if ($this->isPost()) {
+            $action = $this->input('action');
+            
+            if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+                $this->flash('error', 'Güvenlik hatası!');
+                $this->redirect('/admin/cache-management');
+                return;
+            }
+
+            switch ($action) {
+                case 'clear_opcache':
+                    $result = $this->cacheService->clearOpcache();
+                    break;
+                case 'clear_file_cache':
+                    $result = $this->cacheService->clearFileCache();
+                    break;
+                case 'clear_blog_cache':
+                    $result = $this->cacheService->smartClearCache('blog_post');
+                    break;
+                case 'clear_admin_cache':
+                    $result = $this->cacheService->smartClearCache('user_management');
+                    break;
+                case 'cleanup_expired':
+                    $result = $this->cacheService->cleanupExpiredCache();
+                    break;
+                default:
+                    $result = ['success' => false, 'message' => 'Geçersiz işlem'];
+            }
+
+            if ($result['success']) {
+                $this->flash('success', $result['message']);
+            } else {
+                $this->flash('error', $result['message']);
+            }
+
+            $this->redirect('/admin/cache-management');
+            return;
+        }
+
+        $data = [
+            'page_title' => 'Cache Yönetimi',
+            'cache_stats' => $this->cacheService->getCacheStats(),
+            'csrf_token' => $this->generateCSRFToken()
+        ];
+
+        $this->view('admin/cache-management', $data);
     }
 
     /**
