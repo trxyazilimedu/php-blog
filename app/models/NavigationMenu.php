@@ -9,12 +9,26 @@ class NavigationMenu extends Model
      */
     public function getActiveMenuItems($userRole = 'all')
     {
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE is_active = 1 
-                AND (permission_role = 'all' OR permission_role = ? OR ? = 'admin')
-                ORDER BY sort_order ASC";
+        $sql = "SELECT * FROM {$this->table} WHERE is_active = 1";
+        $params = [];
         
-        return $this->query($sql, [$userRole, $userRole]);
+        // Role hierarchy logic
+        if ($userRole === 'admin') {
+            // Admin sees everything - no additional filter needed
+        } elseif ($userRole === 'writer') {
+            // Writer sees: all, user, writer
+            $sql .= " AND permission_role IN ('all', 'user', 'writer')";
+        } elseif ($userRole === 'user') {
+            // User sees: all, user
+            $sql .= " AND permission_role IN ('all', 'user')";
+        } else {
+            // Guest/not logged in: only 'all'
+            $sql .= " AND permission_role = 'all'";
+        }
+        
+        $sql .= " ORDER BY sort_order ASC";
+        
+        return $this->query($sql, $params);
     }
 
     /**

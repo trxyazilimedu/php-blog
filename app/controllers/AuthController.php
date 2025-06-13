@@ -29,7 +29,7 @@ class AuthController extends BaseController
 
             if (empty($email) || empty($password)) {
                 $this->flash('error', 'E-posta ve şifre alanları zorunludur!');
-                $this->redirect('/auth/login');
+                $this->redirect('/login');
                 return;
             }
 
@@ -46,7 +46,7 @@ class AuthController extends BaseController
                 }
             } else {
                 $this->flash('error', $result['message']);
-                $this->redirect('/auth/login');
+                $this->redirect('/login');
             }
             return;
         }
@@ -73,7 +73,9 @@ class AuthController extends BaseController
             $userData = [
                 'name' => $this->input('name'),
                 'email' => $this->input('email'),
-                'password' => $this->input('password')
+                'password' => $this->input('password'),
+                'role' => $this->input('role', 'user'),
+                'bio' => $this->input('bio', '')
             ];
 
             $passwordConfirm = $this->input('password_confirm');
@@ -115,7 +117,7 @@ class AuthController extends BaseController
 
             if ($result['success']) {
                 $this->flash('success', $result['message']);
-                $this->redirect('/auth/login');
+                $this->redirect('/login');
             } else {
                 $this->flash('error', $result['message']);
                 $this->redirect('/auth/register');

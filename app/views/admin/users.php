@@ -261,6 +261,9 @@
 </div>
 
 <script>
+// Set CSRF token for AJAX requests
+window.csrfToken = '<?= htmlspecialchars($csrf_token) ?>';
+
 $(document).ready(function() {
     // Search functionality
     $('#search-users').on('input', function() {

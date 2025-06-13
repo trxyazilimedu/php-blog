@@ -193,3 +193,49 @@ INSERT INTO blog_categories (name, slug, description, color) VALUES
 ('DevOps', 'devops', 'DevOps araçları, CI/CD ve sistem yönetimi', '#06b6d4'),
 ('Güvenlik', 'guvenlik', 'Siber güvenlik, veri koruması ve güvenlik protokolleri', '#84cc16'),
 ('Veritabanı', 'veritabani', 'Veritabanı tasarımı, optimizasyon ve yönetimi', '#f97316');
+
+-- Site Settings tablosu
+CREATE TABLE site_settings (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    setting_key VARCHAR(255) UNIQUE NOT NULL,
+    setting_value TEXT,
+    setting_type ENUM('text', 'number', 'boolean', 'email', 'url', 'json') DEFAULT 'text',
+    description TEXT,
+    category VARCHAR(100) DEFAULT 'general',
+    is_sensitive BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Default site settings
+INSERT INTO site_settings (setting_key, setting_value, setting_type, description, category) VALUES
+-- Genel Ayarlar
+('site_title', 'Teknoloji Bloğum', 'text', 'Site başlığı', 'general'),
+('site_tagline', 'Modern Teknoloji Blogu', 'text', 'Site sloganı', 'general'),
+('site_description', 'Teknoloji, yazılım ve dijital dünya hakkında güncel içerikler.', 'text', 'Site açıklaması (SEO)', 'general'),
+
+-- SMTP Ayarları
+('smtp_host', '', 'text', 'SMTP sunucu adresi', 'email'),
+('smtp_port', '587', 'number', 'SMTP port numarası', 'email'),
+('smtp_username', '', 'email', 'SMTP kullanıcı adı', 'email'),
+('smtp_password', '', 'text', 'SMTP şifre', 'email'),
+('smtp_encryption', 'tls', 'text', 'SMTP şifreleme türü', 'email'),
+('smtp_from_name', 'Teknoloji Bloğum', 'text', 'E-posta gönderen adı', 'email'),
+
+-- Sistem Ayarları
+('timezone', 'Europe/Istanbul', 'text', 'Varsayılan zaman dilimi', 'system'),
+('date_format', 'd.m.Y', 'text', 'Tarih format', 'system'),
+('upload_max_size', '10', 'number', 'Maksimum dosya boyutu (MB)', 'system'),
+('posts_per_page', '10', 'number', 'Sayfa başına post sayısı', 'system'),
+('maintenance_mode', '0', 'boolean', 'Bakım modu durumu', 'system'),
+
+-- SEO Ayarları
+('meta_keywords', 'teknoloji, yazılım, blog, programlama, web geliştirme', 'text', 'Ana anahtar kelimeler', 'seo'),
+('google_analytics', '', 'text', 'Google Analytics ID', 'seo'),
+('google_search_console', '', 'text', 'Google Search Console doğrulama', 'seo'),
+
+-- Sosyal Medya
+('twitter_url', '', 'url', 'Twitter profil linki', 'social'),
+('linkedin_url', '', 'url', 'LinkedIn profil linki', 'social'),
+('github_url', '', 'url', 'GitHub profil linki', 'social'),
+('youtube_url', '', 'url', 'YouTube kanal linki', 'social');

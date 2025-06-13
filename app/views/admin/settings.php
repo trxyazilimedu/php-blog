@@ -170,46 +170,129 @@
                     </div>
                 </div>
                 
-                <!-- Ana Sayfa Ayarları -->
+                <!-- SMTP E-posta Ayarları -->
                 <div class="settings-section">
-                    <h3 class="section-title">Ana Sayfa Ayarları</h3>
+                    <h3 class="section-title">SMTP E-posta Ayarları</h3>
                     
-                    <div class="form-group">
-                        <label for="hero_title" class="form-label">Ana Başlık</label>
-                        <input type="text" class="form-control" id="hero_title" name="hero_title" 
-                               value="<?= htmlspecialchars($hero_title ?? 'Teknoloji Dünyasına Hoş Geldiniz') ?>">
-                        <div class="form-text">Ana sayfadaki büyük başlık</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="smtp_host" class="form-label">SMTP Sunucu</label>
+                            <input type="text" class="form-control" id="smtp_host" name="smtp_host" 
+                                   value="<?= htmlspecialchars($smtp_host ?? '') ?>" placeholder="smtp.gmail.com">
+                            <div class="form-text">E-posta gönderim sunucusu</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_port" class="form-label">SMTP Port</label>
+                            <input type="number" class="form-control" id="smtp_port" name="smtp_port" 
+                                   value="<?= htmlspecialchars($smtp_port ?? '587') ?>" placeholder="587">
+                            <div class="form-text">Genellikle 587 (TLS) veya 465 (SSL)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="smtp_username" class="form-label">SMTP Kullanıcı Adı</label>
+                            <input type="email" class="form-control" id="smtp_username" name="smtp_username" 
+                                   value="<?= htmlspecialchars($smtp_username ?? '') ?>" placeholder="your-email@gmail.com">
+                            <div class="form-text">E-posta adresiniz</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_password" class="form-label">SMTP Şifre</label>
+                            <input type="password" class="form-control" id="smtp_password" name="smtp_password" 
+                                   value="<?= htmlspecialchars($smtp_password ?? '') ?>" placeholder="Uygulama şifreniz">
+                            <div class="form-text">Gmail için uygulama şifresi</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="smtp_encryption" class="form-label">Şifreleme</label>
+                            <select class="form-control" id="smtp_encryption" name="smtp_encryption">
+                                <option value="tls" <?= ($smtp_encryption ?? 'tls') === 'tls' ? 'selected' : '' ?>>TLS</option>
+                                <option value="ssl" <?= ($smtp_encryption ?? 'tls') === 'ssl' ? 'selected' : '' ?>>SSL</option>
+                                <option value="none" <?= ($smtp_encryption ?? 'tls') === 'none' ? 'selected' : '' ?>>Yok</option>
+                            </select>
+                            <div class="form-text">Güvenlik protokolü</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="smtp_from_name" class="form-label">Gönderen Adı</label>
+                            <input type="text" class="form-control" id="smtp_from_name" name="smtp_from_name" 
+                                   value="<?= htmlspecialchars($smtp_from_name ?? $site_title ?? 'Teknoloji Blog') ?>">
+                            <div class="form-text">E-postalarda görünecek gönderen adı</div>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="hero_subtitle" class="form-label">Alt Başlık</label>
-                        <textarea class="form-control" id="hero_subtitle" name="hero_subtitle" rows="2"><?= htmlspecialchars($hero_subtitle ?? 'Yazılım, teknoloji trendleri ve dijital dünya hakkında kaliteli içerikler keşfedin.') ?></textarea>
-                        <div class="form-text">Ana sayfadaki açıklama metni</div>
-                    </div>
-                    
-                    <div class="preview-section">
-                        <div class="preview-title">Önizleme:</div>
-                        <h2 style="margin: 0; color: #333;" id="hero_preview_title"><?= htmlspecialchars($hero_title ?? 'Teknoloji Dünyasına Hoş Geldiniz') ?></h2>
-                        <p style="margin: 0.5rem 0 0 0; color: #666;" id="hero_preview_subtitle"><?= htmlspecialchars($hero_subtitle ?? 'Yazılım, teknoloji trendleri ve dijital dünya hakkında kaliteli içerikler keşfedin.') ?></p>
+                        <button type="button" class="btn btn-success" onclick="testSmtpConnection()" id="smtp-test-btn">
+                            <i class="fas fa-envelope-open-text mr-2"></i>SMTP Bağlantısını Test Et
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="testSmtpConnection(true)" id="smtp-email-test-btn" style="margin-left: 10px; display: none;">
+                            <i class="fas fa-paper-plane mr-2"></i>Test E-postası Gönder
+                        </button>
+                        <div id="smtp-test-result" style="margin-top: 1rem;"></div>
                     </div>
                 </div>
                 
-                <!-- Footer Ayarları -->
+                <!-- Sistem Ayarları -->
                 <div class="settings-section">
-                    <h3 class="section-title">Footer Ayarları</h3>
+                    <h3 class="section-title">Sistem Ayarları</h3>
                     
-                    <div class="form-group">
-                        <label for="footer_text" class="form-label">Footer Metni</label>
-                        <input type="text" class="form-control" id="footer_text" name="footer_text" 
-                               value="<?= htmlspecialchars($footer_text ?? '© 2025 Teknoloji Blog - Tüm hakları saklıdır.') ?>">
-                        <div class="form-text">Sayfanın altındaki telif hakkı metni</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="timezone" class="form-label">Zaman Dilimi</label>
+                            <select class="form-control" id="timezone" name="timezone">
+                                <option value="Europe/Istanbul" <?= ($timezone ?? 'Europe/Istanbul') === 'Europe/Istanbul' ? 'selected' : '' ?>>Türkiye (UTC+3)</option>
+                                <option value="UTC" <?= ($timezone ?? 'Europe/Istanbul') === 'UTC' ? 'selected' : '' ?>>UTC</option>
+                                <option value="Europe/London" <?= ($timezone ?? 'Europe/Istanbul') === 'Europe/London' ? 'selected' : '' ?>>Londra (UTC+0)</option>
+                                <option value="America/New_York" <?= ($timezone ?? 'Europe/Istanbul') === 'America/New_York' ? 'selected' : '' ?>>New York (UTC-5)</option>
+                            </select>
+                            <div class="form-text">Site için varsayılan zaman dilimi</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="date_format" class="form-label">Tarih Formatı</label>
+                            <select class="form-control" id="date_format" name="date_format">
+                                <option value="d.m.Y" <?= ($date_format ?? 'd.m.Y') === 'd.m.Y' ? 'selected' : '' ?>>31.12.2025</option>
+                                <option value="Y-m-d" <?= ($date_format ?? 'd.m.Y') === 'Y-m-d' ? 'selected' : '' ?>>2025-12-31</option>
+                                <option value="m/d/Y" <?= ($date_format ?? 'd.m.Y') === 'm/d/Y' ? 'selected' : '' ?>>12/31/2025</option>
+                                <option value="d F Y" <?= ($date_format ?? 'd.m.Y') === 'd F Y' ? 'selected' : '' ?>>31 Aralık 2025</option>
+                            </select>
+                            <div class="form-text">Tarih gösterim formatı</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="upload_max_size" class="form-label">Maksimum Dosya Boyutu (MB)</label>
+                            <input type="number" class="form-control" id="upload_max_size" name="upload_max_size" 
+                                   value="<?= htmlspecialchars($upload_max_size ?? '10') ?>" min="1" max="100">
+                            <div class="form-text">Yüklenen dosyaların maksimum boyutu</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="posts_per_page" class="form-label">Sayfa Başına Post</label>
+                            <input type="number" class="form-control" id="posts_per_page" name="posts_per_page" 
+                                   value="<?= htmlspecialchars($posts_per_page ?? '10') ?>" min="5" max="50">
+                            <div class="form-text">Blog listesinde gösterilecek post sayısı</div>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="contact_email" class="form-label">İletişim E-postası</label>
-                        <input type="email" class="form-control" id="contact_email" name="contact_email" 
-                               value="<?= htmlspecialchars($contact_email ?? 'info@teknolojiblog.com') ?>">
-                        <div class="form-text">Genel iletişim için e-posta adresi</div>
+                        <label class="form-label">Bakım Modu</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="maintenance_mode" value="0" <?= ($maintenance_mode ?? '0') === '0' ? 'checked' : '' ?>>
+                                <span>Kapalı</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="maintenance_mode" value="1" <?= ($maintenance_mode ?? '0') === '1' ? 'checked' : '' ?>>
+                                <span>Açık</span>
+                            </label>
+                        </div>
+                        <div class="form-text">Bakım modunda site sadece adminlere açık olur</div>
                     </div>
                 </div>
                 
@@ -287,22 +370,82 @@
 </div>
 
 <script>
-// Live preview for hero section
-document.getElementById('hero_title').addEventListener('input', function() {
-    document.getElementById('hero_preview_title').textContent = this.value || 'Teknoloji Dünyasına Hoş Geldiniz';
-});
-
-document.getElementById('hero_subtitle').addEventListener('input', function() {
-    document.getElementById('hero_preview_subtitle').textContent = this.value || 'Yazılım, teknoloji trendleri ve dijital dünya hakkında kaliteli içerikler keşfedin.';
-});
-
 function previewSite() {
     window.open('/', '_blank');
 }
 
+// SMTP Test Function
+function testSmtpConnection(sendTestEmail = false) {
+    const resultDiv = document.getElementById('smtp-test-result');
+    const testBtn = document.getElementById('smtp-test-btn');
+    const emailBtn = document.getElementById('smtp-email-test-btn');
+    const activeButton = sendTestEmail ? emailBtn : testBtn;
+    
+    // Get SMTP settings
+    const smtpData = {
+        smtp_host: document.getElementById('smtp_host').value,
+        smtp_port: document.getElementById('smtp_port').value,
+        smtp_username: document.getElementById('smtp_username').value,
+        smtp_password: document.getElementById('smtp_password').value,
+        smtp_encryption: document.getElementById('smtp_encryption').value,
+        smtp_from_name: document.getElementById('smtp_from_name').value,
+        send_test_email: sendTestEmail ? 'true' : 'false',
+        csrf_token: document.querySelector('input[name="csrf_token"]').value
+    };
+    
+    // Check if required fields are filled
+    if (!smtpData.smtp_host || !smtpData.smtp_username || !smtpData.smtp_password) {
+        resultDiv.innerHTML = '<div style="color: #dc3545; padding: 0.5rem; background: #f8d7da; border-radius: 4px;">Lütfen SMTP ayarlarını doldurun!</div>';
+        return;
+    }
+    
+    // Show loading
+    activeButton.disabled = true;
+    if (sendTestEmail) {
+        activeButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>E-posta gönderiliyor...';
+        resultDiv.innerHTML = '<div style="color: #0c5460; padding: 0.5rem; background: #bee5eb; border-radius: 4px;">Test e-postası gönderiliyor...</div>';
+    } else {
+        activeButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Test ediliyor...';
+        resultDiv.innerHTML = '<div style="color: #0c5460; padding: 0.5rem; background: #bee5eb; border-radius: 4px;">SMTP bağlantısı test ediliyor...</div>';
+    }
+    
+    // Send AJAX request
+    fetch('/admin/test-smtp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(smtpData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            resultDiv.innerHTML = '<div style="color: #155724; padding: 0.5rem; background: #d4edda; border-radius: 4px;"><i class="fas fa-check mr-2"></i>' + data.message + '</div>';
+            
+            // İlk test başarılıysa e-posta gönderme butonunu göster
+            if (!sendTestEmail && data.success) {
+                emailBtn.style.display = 'inline-block';
+            }
+        } else {
+            resultDiv.innerHTML = '<div style="color: #721c24; padding: 0.5rem; background: #f8d7da; border-radius: 4px;"><i class="fas fa-times mr-2"></i>' + data.message + '</div>';
+            emailBtn.style.display = 'none';
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = '<div style="color: #721c24; padding: 0.5rem; background: #f8d7da; border-radius: 4px;"><i class="fas fa-exclamation-triangle mr-2"></i>Test sırasında hata oluştu!</div>';
+        emailBtn.style.display = 'none';
+    })
+    .finally(() => {
+        testBtn.disabled = false;
+        emailBtn.disabled = false;
+        testBtn.innerHTML = '<i class="fas fa-envelope-open-text mr-2"></i>SMTP Bağlantısını Test Et';
+        emailBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Test E-postası Gönder';
+    });
+}
+
 // Form validation
 document.querySelector('form').addEventListener('submit', function(e) {
-    const requiredFields = ['site_title', 'site_description', 'hero_title'];
+    const requiredFields = ['site_title', 'site_description'];
     let isValid = true;
     
     requiredFields.forEach(fieldName => {
@@ -319,5 +462,21 @@ document.querySelector('form').addEventListener('submit', function(e) {
         e.preventDefault();
         alert('Lütfen tüm gerekli alanları doldurun.');
     }
+});
+
+// Show current system info
+document.addEventListener('DOMContentLoaded', function() {
+    // Add PHP info display
+    const systemInfo = document.createElement('div');
+    systemInfo.innerHTML = `
+        <div style="margin-top: 2rem; padding: 1rem; background: #e9ecef; border-radius: 6px; font-size: 0.9rem;">
+            <strong>Sistem Bilgileri:</strong><br>
+            PHP Versiyonu: <?= PHP_VERSION ?><br>
+            Maksimum Upload: <?= ini_get('upload_max_filesize') ?><br>
+            Maksimum Post: <?= ini_get('post_max_size') ?><br>
+            Memory Limit: <?= ini_get('memory_limit') ?>
+        </div>
+    `;
+    document.querySelector('.save-section').parentNode.insertBefore(systemInfo, document.querySelector('.save-section'));
 });
 </script>

@@ -296,6 +296,7 @@ abstract class Controller
         return $_SERVER['REQUEST_METHOD'] === 'POST';
     }
 
+
     /**
      * Request method kontrolü - GET
      */

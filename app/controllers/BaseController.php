@@ -230,9 +230,9 @@ abstract class BaseController extends Controller
     {
         $defaults = [
             'footer_description' => 'Modern web teknolojileri, yazılım geliştirme ve dijital dünya hakkında güncel içerikler paylaşıyoruz.',
-            'contact_email' => 'info@teknolojiblog.com',
-            'contact_phone' => '+90 (555) 123 45 67',
-            'contact_address' => 'İstanbul, Türkiye',
+            'contact_email' => 'info@trxyazilim.com',
+            'contact_phone' => '+90 (555) 605 40 22',
+            'contact_address' => 'Kırşehir, Türkiye',
             'footer_copyright' => 'Tüm hakları saklıdır.'
         ];
         

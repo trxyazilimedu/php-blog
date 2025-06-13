@@ -69,7 +69,8 @@ class AdminController extends BaseController
             'page_title' => 'Kullanıcı Yönetimi',
             'users' => $users,
             'pending_users' => $pendingUsers,
-            'stats' => $stats
+            'stats' => $stats,
+            'csrf_token' => $this->generateCSRFToken()
         ];
 
         $this->view('admin/users', $data);
@@ -83,6 +84,12 @@ class AdminController extends BaseController
         $this->requireAdmin();
 
         if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            // If AJAX request, return JSON
+            if ($this->isAjax()) {
+                $this->json(['success' => false, 'message' => 'Geçersiz CSRF token!']);
+                return;
+            }
+            
             $this->flash('error', 'Geçersiz CSRF token!');
             $this->redirect('/admin/users');
             return;
@@ -90,6 +97,12 @@ class AdminController extends BaseController
 
         $currentUser = $this->getLoggedInUser();
         $result = $this->userManagementService->approveUser($userId, $currentUser['id']);
+
+        // If AJAX request, return JSON
+        if ($this->isAjax()) {
+            $this->json($result);
+            return;
+        }
 
         if ($result['success']) {
             $this->flash('success', $result['message']);
@@ -108,6 +121,12 @@ class AdminController extends BaseController
         $this->requireAdmin();
 
         if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+            // If AJAX request, return JSON
+            if ($this->isAjax()) {
+                $this->json(['success' => false, 'message' => 'Geçersiz CSRF token!']);
+                return;
+            }
+            
             $this->flash('error', 'Geçersiz CSRF token!');
             $this->redirect('/admin/users');
             return;
@@ -115,6 +134,12 @@ class AdminController extends BaseController
 
         $currentUser = $this->getLoggedInUser();
         $result = $this->userManagementService->rejectUser($userId, $currentUser['id']);
+
+        // If AJAX request, return JSON
+        if ($this->isAjax()) {
+            $this->json($result);
+            return;
+        }
 
         if ($result['success']) {
             $this->flash('success', $result['message']);
@@ -512,41 +537,135 @@ class AdminController extends BaseController
     {
         $this->requireAdmin();
 
+        $settingsService = new SettingsService();
+
         if ($this->isPost()) {
+            if (!$this->validateCSRFToken($this->input('csrf_token'))) {
+                $this->flash('error', 'Güvenlik hatası!');
+                $this->redirect('/admin/settings');
+                return;
+            }
+
             $settings = [
+                // Genel Ayarlar
                 'site_title' => $this->input('site_title'),
+                'site_tagline' => $this->input('site_tagline'),
                 'site_description' => $this->input('site_description'),
-                'hero_title' => $this->input('hero_title'),
-                'hero_subtitle' => $this->input('hero_subtitle'),
-                'footer_text' => $this->input('footer_text'),
-                'sidebar_about' => $this->input('sidebar_about')
+                
+                // SMTP Ayarları
+                'smtp_host' => $this->input('smtp_host'),
+                'smtp_port' => $this->input('smtp_port'),
+                'smtp_username' => $this->input('smtp_username'),
+                'smtp_password' => $this->input('smtp_password'),
+                'smtp_encryption' => $this->input('smtp_encryption'),
+                'smtp_from_name' => $this->input('smtp_from_name'),
+                
+                // Sistem Ayarları
+                'timezone' => $this->input('timezone'),
+                'date_format' => $this->input('date_format'),
+                'upload_max_size' => $this->input('upload_max_size'),
+                'posts_per_page' => $this->input('posts_per_page'),
+                'maintenance_mode' => $this->input('maintenance_mode', '0'),
+                
+                // SEO Ayarları
+                'meta_keywords' => $this->input('meta_keywords'),
+                'google_analytics' => $this->input('google_analytics'),
+                'google_search_console' => $this->input('google_search_console'),
+                
+                // Sosyal Medya
+                'twitter_url' => $this->input('twitter_url'),
+                'linkedin_url' => $this->input('linkedin_url'),
+                'github_url' => $this->input('github_url'),
+                'youtube_url' => $this->input('youtube_url')
             ];
 
-            $result = $this->contentService->updateMultipleContent($settings);
-            
-            if ($result['success']) {
-                $this->flash('success', $result['message']);
+            if ($settingsService->updateSettings($settings)) {
+                $this->flash('success', 'Site ayarları başarıyla güncellendi!');
             } else {
-                $this->flash('error', $result['message']);
+                $this->flash('error', 'Ayarlar güncellenirken bir hata oluştu!');
             }
 
             $this->redirect('/admin/settings');
             return;
         }
 
-        $data = [
+        // Mevcut ayarları getir
+        $allSettings = $settingsService->getAllSettings();
+
+        $data = array_merge([
             'page_title' => 'Site Ayarları',
-            'menuItems' => $this->navigationService->getAllMenuItems(),
-            'possibleParents' => $this->navigationService->getPossibleParents(),
-            'site_title' => $this->contentService->getContent('site_title'),
-            'site_description' => $this->contentService->getContent('site_description'),
-            'hero_title' => $this->contentService->getContent('hero_title'),
-            'hero_subtitle' => $this->contentService->getContent('hero_subtitle'),
-            'footer_text' => $this->contentService->getContent('footer_text'),
-            'sidebar_about' => $this->contentService->getContent('sidebar_about')
-        ];
+            'csrf_token' => $this->generateCSRFToken()
+        ], $allSettings);
 
         $this->view('admin/settings', $data);
+    }
+
+    /**
+     * SMTP test
+     */
+    public function testSmtp()
+    {
+        $this->requireAdmin();
+
+        if (!$this->isPost()) {
+            $this->json(['success' => false, 'message' => 'Geçersiz istek']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!$this->validateCSRFToken($input['csrf_token'])) {
+            $this->json(['success' => false, 'message' => 'Güvenlik hatası']);
+            return;
+        }
+
+        $mailService = new MailService();
+        
+        // Test için geçici SMTP ayarları
+        $testSettings = [
+            'host' => $input['smtp_host'],
+            'port' => (int)$input['smtp_port'],
+            'username' => $input['smtp_username'],
+            'password' => $input['smtp_password'],
+            'encryption' => $input['smtp_encryption'],
+            'from_name' => $input['smtp_from_name']
+        ];
+
+        // Önce bağlantı testini yap
+        $connectionResult = $mailService->testConnection($testSettings);
+        
+        if (!$connectionResult['success']) {
+            $this->json($connectionResult);
+            return;
+        }
+
+        // Bağlantı başarılıysa test e-postası göndermeyi teklif et
+        $inputData = json_decode(file_get_contents('php://input'), true);
+        $testEmailOption = $inputData['send_test_email'] ?? 'false';
+        
+        if ($testEmailOption === 'true') {
+            // Test e-postası gönder
+            $mailService->updateSmtpSettings($testSettings);
+            $emailResult = $mailService->sendTestEmail($testSettings['username']);
+            
+            if ($emailResult['success']) {
+                $this->json([
+                    'success' => true,
+                    'message' => 'SMTP bağlantısı başarılı! Test e-postası gönderildi: ' . $testSettings['username']
+                ]);
+            } else {
+                $this->json([
+                    'success' => false,
+                    'message' => 'SMTP bağlantısı başarılı ancak e-posta gönderilemedi: ' . $emailResult['message']
+                ]);
+            }
+        } else {
+            // Sadece bağlantı testi sonucu döndür
+            $this->json([
+                'success' => true,
+                'message' => $connectionResult['message'] . ' Test e-postası göndermek için butona tekrar tıklayın.'
+            ]);
+        }
     }
 
     /**

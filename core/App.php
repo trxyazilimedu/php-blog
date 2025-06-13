@@ -14,6 +14,11 @@ class App
             ob_start();
         }
         
+        // Composer autoload'ı yükle
+        if (file_exists(ROOT_PATH . '/vendor/autoload.php')) {
+            require_once ROOT_PATH . '/vendor/autoload.php';
+        }
+        
         // Helper fonksiyonlarını yükle
         require_once APP_PATH . '/config/functions.php';
         

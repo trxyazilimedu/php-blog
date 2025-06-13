@@ -76,6 +76,7 @@ Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
     Router::post('/categories/delete/{id}', 'Admin@deleteCategory');
     Router::get('/settings', 'Admin@settings');
     Router::post('/settings', 'Admin@settings');
+    Router::post('/test-smtp', 'Admin@testSmtp');
     
     // AJAX endpoints
     Router::post('/toggle-edit-mode', 'Admin@toggleEditMode');
@@ -96,6 +97,7 @@ Router::group(['prefix' => 'admin', 'middleware' => ['admin']], function() {
 Router::group(['middleware' => ['auth']], function() {
     Router::get('/profile', 'User@profile');
     Router::post('/profile', 'User@profile');
-    Router::get('/profile/edit', 'User@edit');
-    Router::post('/profile/edit', 'User@edit');
+    Router::get('/profile/edit', 'User@editProfile');
+    Router::post('/profile/edit', 'User@editProfile');
+    Router::post('/profile/delete-avatar', 'User@deleteProfileImage');
 });

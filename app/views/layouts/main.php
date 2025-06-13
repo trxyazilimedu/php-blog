@@ -1,9 +1,35 @@
+<?php
+// Site ayarlarını getir
+$settingsService = new SettingsService();
+$siteTitle = $settingsService->getSiteTitle();
+$siteTagline = $settingsService->getSiteTagline();
+$siteDescription = $settingsService->getSiteDescription();
+?>
 <!DOCTYPE html>
 <html lang="tr" class="scroll-smooth" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($page_title) ? htmlspecialchars($page_title) . ' - ' : '' ?><?= htmlspecialchars($app_name) ?></title>
+    <title><?= isset($page_title) ? htmlspecialchars($page_title) . ' - ' : '' ?><?= htmlspecialchars($siteTitle) ?></title>
+    <meta name="description" content="<?= htmlspecialchars($siteDescription) ?>">
+    
+    <?php 
+    // SEO ayarları
+    $seoSettings = $settingsService->getSeoSettings();
+    if (!empty($seoSettings['meta_keywords'])): ?>
+    <meta name="keywords" content="<?= htmlspecialchars($seoSettings['meta_keywords']) ?>">
+    <?php endif; ?>
+    
+    <?php if (!empty($seoSettings['google_analytics'])): ?>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<?= htmlspecialchars($seoSettings['google_analytics']) ?>"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '<?= htmlspecialchars($seoSettings['google_analytics']) ?>');
+    </script>
+    <?php endif; ?>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -306,7 +332,7 @@
                             <i class="fas fa-code text-white text-sm lg:text-base"></i>
                         </div>
                         <h1 class="text-lg lg:text-xl font-bold gradient-text dark:text-white hidden sm:block editable-content" data-content-key="site_name">
-                            <?= htmlspecialchars($contentService->getContent('site_name', $app_name)) ?>
+                            <?= htmlspecialchars($siteTitle) ?>
                         </h1>
                     </a>
                 </div>
@@ -365,11 +391,17 @@
                         <!-- Profile Dropdown -->
                         <div class="relative" id="profile-dropdown">
                             <button class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" id="profile-button">
-                                <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
-                                    <span class="text-white text-sm font-semibold">
-                                        <?= strtoupper(substr($user['name'], 0, 1)) ?>
-                                    </span>
-                                </div>
+                                <?php if (!empty($user['avatar'])): ?>
+                                    <img src="<?= htmlspecialchars($user['avatar']) ?>" 
+                                         alt="Profil Fotoğrafı" 
+                                         class="w-8 h-8 rounded-full object-cover">
+                                <?php else: ?>
+                                    <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm font-semibold">
+                                            <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="hidden lg:block">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($user['name']) ?></p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400"><?= ucfirst($user['role']) ?></p>

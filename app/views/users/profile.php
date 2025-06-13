@@ -3,9 +3,15 @@
     <div class="flex flex-col md:flex-row items-center justify-between">
         <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
             <!-- Avatar -->
-            <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold backdrop-blur-sm border-2 border-white/30">
-                <?= strtoupper(substr($user['name'], 0, 1)) ?>
-            </div>
+            <?php if (!empty($user['avatar'])): ?>
+                <img src="<?= htmlspecialchars($user['avatar']) ?>" 
+                     alt="Profil Fotoğrafı" 
+                     class="w-24 h-24 rounded-full object-cover backdrop-blur-sm border-2 border-white/30">
+            <?php else: ?>
+                <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold backdrop-blur-sm border-2 border-white/30">
+                    <?= strtoupper(substr($user['name'], 0, 1)) ?>
+                </div>
+            <?php endif; ?>
             
             <!-- User Info -->
             <div class="text-center md:text-left">
@@ -206,7 +212,7 @@
             </div>
             
             <div class="p-6 space-y-3">
-                <a href="/users/edit/<?= $user['id'] ?>" 
+                <a href="/profile/edit" 
                    class="block w-full bg-yellow-500 hover:bg-yellow-600 text-white text-center py-3 px-4 rounded-lg font-medium transition-colors">
                     <i class="fas fa-edit mr-2"></i>
                     Profili Düzenle
