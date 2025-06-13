@@ -4,6 +4,7 @@ $settingsService = new SettingsService();
 $siteTitle = $settingsService->getSiteTitle();
 $siteTagline = $settingsService->getSiteTagline();
 $siteDescription = $settingsService->getSiteDescription();
+$socialLinks = $settingsService->getSocialLinks();
 ?>
 <!DOCTYPE html>
 <html lang="tr" class="scroll-smooth" id="html-root">
@@ -539,18 +540,45 @@ $siteDescription = $settingsService->getSiteDescription();
                         <?= htmlspecialchars($contentService->getContent('footer_description', 'Modern web teknolojileri, yazılım geliştirme ve dijital dünya hakkında güncel içerikler paylaşıyoruz.')) ?>
                     </p>
                     <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <?php if (!empty($socialLinks['twitter'])): ?>
+                        <a href="<?= htmlspecialchars($socialLinks['twitter']) ?>" 
+                           class="text-gray-400 hover:text-white transition-colors" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           aria-label="Twitter'da takip edin">
                             <i class="fab fa-twitter text-xl"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($socialLinks['linkedin'])): ?>
+                        <a href="<?= htmlspecialchars($socialLinks['linkedin']) ?>" 
+                           class="text-gray-400 hover:text-white transition-colors" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           aria-label="LinkedIn'de bağlantı kurun">
                             <i class="fab fa-linkedin text-xl"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($socialLinks['github'])): ?>
+                        <a href="<?= htmlspecialchars($socialLinks['github']) ?>" 
+                           class="text-gray-400 hover:text-white transition-colors" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           aria-label="GitHub'da proje takibi yapın">
                             <i class="fab fa-github text-xl"></i>
                         </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($socialLinks['youtube'])): ?>
+                        <a href="<?= htmlspecialchars($socialLinks['youtube']) ?>" 
+                           class="text-gray-400 hover:text-white transition-colors" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           aria-label="YouTube kanalımıza abone olun">
                             <i class="fab fa-youtube text-xl"></i>
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
